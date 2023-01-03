@@ -1,4 +1,5 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/WingSelectionPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -80,7 +81,9 @@ class FirstPage extends StatelessWidget {
                   fontSize: 20
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>WingSelectionPage()));
+              },
               style: TextButton.styleFrom(foregroundColor: MyColors.buttonColor),
             ),
           ),
