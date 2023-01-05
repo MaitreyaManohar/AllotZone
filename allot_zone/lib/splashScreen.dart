@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
           color: Color.fromARGB(255, 255, 255, 255)
         ),
       ),
-      nextScreen: const FirstPage(),
+      nextScreen: FirstPage(),
       duration: 1500,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       splashTransition: SplashTransition.fadeTransition,

@@ -1,12 +1,16 @@
 import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/WingSelectionPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 class FirstPage extends StatelessWidget {
-  const FirstPage({super.key});
-
+  FirstPage({super.key});
+  String ?studentId;
+  String ?studentName;
+  String ?password;
+  CollectionReference users = FirebaseFirestore.instance.collection("users");
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +34,7 @@ class FirstPage extends StatelessWidget {
           SizedBox(
             width: 300,
             child: TextField(
+              onChanged: ((value) => studentName=value),
               style: TextStyle(
                 color: MyColors.buttonColor,
               ),
@@ -45,6 +50,7 @@ class FirstPage extends StatelessWidget {
           SizedBox(
             width: 300,
             child: TextField(
+              onChanged: (value) => studentId=value,
               style: TextStyle(
                 color: MyColors.buttonColor,
               ),
@@ -60,6 +66,7 @@ class FirstPage extends StatelessWidget {
           SizedBox(
             width: 300,
             child: TextField(
+              onChanged: (value) => password=value,
               style: TextStyle(
                 color: MyColors.buttonColor,
               ),
@@ -77,33 +84,46 @@ class FirstPage extends StatelessWidget {
             child: TextButton(
               child: const Text(
                 "Next",
-                style: TextStyle(
-                  fontSize: 20
-                ),
+                style: TextStyle(fontSize: 20),
               ),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>WingSelectionPage()));
+              onPressed: () async {
+                await users.add({
+                    'name':studentName,
+                    'id':studentId,
+                    'password':password
+                }).then((value) => print("User Added"));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => WingSelectionPage()));
               },
-              style: TextButton.styleFrom(foregroundColor: MyColors.buttonColor),
+              style:
+                  TextButton.styleFrom(foregroundColor: MyColors.buttonColor),
             ),
           ),
-          Row(children: [
-            TextButton(
-              child: const Text(
-                "Login",
+          Row(
+            children: [
+              TextButton(
+                child: const Text(
+                  "Login",
+                ),
+                onPressed: () {},
+                style:
+                    TextButton.styleFrom(foregroundColor: MyColors.linkColor),
               ),
-              onPressed: () {},
-              style: TextButton.styleFrom(foregroundColor: MyColors.linkColor),
-            ),
-            TextButton(
-              child: const Text(
-                "Manager?",
+              TextButton(
+                child: const Text(
+                  "Manager?",
+                ),
+                onPressed: () async{
+                  
+                },
+                style:
+                    TextButton.styleFrom(foregroundColor: MyColors.linkColor),
               ),
-              onPressed: () {},
-              style: TextButton.styleFrom(foregroundColor: MyColors.linkColor),
-            ),
-          ],
-          mainAxisAlignment: MainAxisAlignment.spaceAround,)
+            ],
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          )
         ],
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
