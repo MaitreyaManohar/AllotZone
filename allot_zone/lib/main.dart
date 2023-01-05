@@ -1,3 +1,4 @@
+import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/splashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -38,14 +39,12 @@ class AllotZone extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: createMaterialColor(const Color.fromARGB(255, 255, 214, 10)),
           scaffoldBackgroundColor: const Color.fromARGB(255, 48, 48, 48),
-          fontFamily: 'Nexa',
-          textTheme: TextTheme(
-            button: TextStyle(color: Colors.amber),
-            headline1: TextStyle(color: Theme.of(context).primaryColor),
-            headline2: TextStyle(color: Theme.of(context).primaryColor),
-            bodyText2: TextStyle(color: Theme.of(context).primaryColor),
-            subtitle1: TextStyle(color: Theme.of(context).primaryColorLight),
-          ),
+          fontFamily: 'Monsterrat',
+          textTheme: Theme.of(context).textTheme.apply(
+            fontFamily: 'Monsterrat',
+            bodyColor: MyColors.textColor,
+
+          )
         ),
         home: const Scaffold(
           body: SplashScreen(),

@@ -1,13 +1,9 @@
-import 'dart:async';
 
-import 'package:allot_zone/firstPage.dart';
-import 'package:allot_zone/main.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:page_transition/page_transition.dart';
+
+import 'login_first_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

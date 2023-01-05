@@ -3,11 +3,12 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 import 'Colors.dart';
-import 'individual_wing.dart';
+import 'individual_wing_model.dart';
 
 class WingMembers extends StatelessWidget {
-  WingModel selected;
-  WingMembers({super.key, required this.selected});
+  final WingModel selected;
+
+  const WingMembers({super.key,required this.selected});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +24,7 @@ class WingMembers extends StatelessWidget {
           SizedBox(
             height: 600,
             child: ListView.builder(
-              itemCount: 2*selected.wingSize-1,
+              itemCount: 2*selected.wingSize.toInt()-1,
               itemBuilder: ((context, index) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -37,7 +38,7 @@ class WingMembers extends StatelessWidget {
                         width: 300,
                         child: TextField(
                           style: TextStyle(
-                            color: MyColors.buttonColor,
+                            color: MyColors.buttonTextColor,
                           ),
                           decoration: InputDecoration(
                               enabledBorder: UnderlineInputBorder(
@@ -52,7 +53,7 @@ class WingMembers extends StatelessWidget {
                         width: 300,
                         child: TextField(
                           style: TextStyle(
-                            color: MyColors.buttonColor,
+                            color: MyColors.buttonTextColor,
                           ),
                           decoration: InputDecoration(
                               enabledBorder: UnderlineInputBorder(
@@ -74,16 +75,17 @@ class WingMembers extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextButton(
-              child: const Text(
-                "Submit",
-                style: TextStyle(fontSize: 20),
-              ),
+              
               onPressed: () {
                 selected.isAvailable=false;
                 selected.setFill = Colors.grey;
               },
               style:
-                  TextButton.styleFrom(foregroundColor: MyColors.buttonColor),
+                  TextButton.styleFrom(foregroundColor: MyColors.buttonTextColor),
+              child: const Text(
+                "Submit",
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ),
         ],
