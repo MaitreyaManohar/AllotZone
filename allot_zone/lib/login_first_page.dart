@@ -1,4 +1,5 @@
 import 'package:allot_zone/wing_selection.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -9,15 +10,18 @@ class FirstPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  AlertDialog alert = const AlertDialog(
-    title: Text("My title"),
-    content: Text("This is my message."),
-  );
+  
 
   Future signIn(BuildContext context, String email, String password) async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+      final doc = FirebaseFirestore.instance.collection("users").doc(email);
+      await doc.set(
+        {
+          'email':email
+        }
+      );
       Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: 
       ((context) => const WingSelection())
       ));
@@ -44,7 +48,12 @@ class FirstPage extends StatelessWidget {
       Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: 
       ((context) => const WingSelection())
       ));
-    
+      final doc = FirebaseFirestore.instance.collection("users").doc(email);
+      await doc.set(
+        {
+          'email':email
+        }
+      );
     } on FirebaseAuthException catch (e) {
       print(e.code);
       if (e.code == 'email-already-in-use') {

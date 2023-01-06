@@ -22,4 +22,18 @@ class WingModel {
   set setIsSelected(bool isSelected){
     this.isSelected = isSelected;
   }
+
+  Map<String, dynamic> toJson() => {
+        'wingId': wingId,
+        'wingSize': wingSize,
+        'isAvailable':isAvailable,
+        'isHorizontal':isHorizontal
+      };
+
+  static WingModel fromJson(Map<String,dynamic> json){
+    WingModel w = WingModel(wingId: json['wingId'],isHorizontal: json['isHorizontal'],wingSize: json['wingSize']);
+    if(!w.isAvailable) Colors.grey;
+    print("This is happening ${w.isSelected}");
+    return w;
+  }
 }
