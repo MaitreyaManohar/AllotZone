@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1075877008859",
+    "project_id": "allotzone",
+    "storage_bucket": "allotzone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075877008859:android:ab972168ebace0598e43fe",
+        "android_client_info": {
+          "package_name": "com.example.allot_zone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075877008859-spg9no68rqdnk1t98jvm3ee4lbi6nsca.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCipwJ5Dn6ATO9D7wtVR5YwXA_836gy0rI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075877008859-spg9no68rqdnk1t98jvm3ee4lbi6nsca.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
