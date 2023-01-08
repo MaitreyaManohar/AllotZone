@@ -12,7 +12,7 @@ class WingModel {
   bool isHorizontal;
   Color fill = const Color.fromARGB(0, 255, 193, 7);
   
-  WingModel({required this.wingId,required this.wingSize,required this.isHorizontal});
+  WingModel({required this.isAvailable, required this.wingId,required this.wingSize,required this.isHorizontal});
 
   
   set setFill(Color fill){
@@ -31,7 +31,7 @@ class WingModel {
       };
 
   static WingModel fromJson(Map<String,dynamic> json){
-    WingModel w = WingModel(wingId: json['wingId'],isHorizontal: json['isHorizontal'],wingSize: json['wingSize']);
+    WingModel w = WingModel(wingId: json['wingId'],isHorizontal: json['isHorizontal'],wingSize: json['wingSize'],isAvailable: json['isAvailable']);
     if(!w.isAvailable) Colors.grey;
     print("This is happening ${w.isSelected}");
     return w;

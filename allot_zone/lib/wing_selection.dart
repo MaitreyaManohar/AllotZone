@@ -116,7 +116,7 @@ class _WingSelectionState extends State<WingSelection> {
                             backgroundColor: Colors.grey,
                           )));
                 } else {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>

@@ -1,5 +1,9 @@
+import 'package:allot_zone/after_selection.dart';
+import 'package:allot_zone/login_first_page.dart';
+import 'package:allot_zone/wing_selection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -19,7 +23,6 @@ class WingMembers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
@@ -27,6 +30,7 @@ class WingMembers extends StatelessWidget {
         ),
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           SizedBox(
             height: 600,
@@ -71,6 +75,32 @@ class WingMembers extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: TextButton(
               onPressed: () async {
+                var collection =
+                    FirebaseFirestore.instance.collection("vishwakarma");
+                var querySnapshot = await collection.get();
+                for (var w in querySnapshot.docs) {
+                  Map<String, dynamic> data = w.data();
+                  wingList.add(WingModel.fromJson(data));
+                }
+                WingModel found = wingList
+                    .firstWhere((element) => element.wingId == selected.wingId);
+                if (!found.isAvailable) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WingSelection(),
+                      ));
+                  return;
+                }
+                if (FirebaseAuth.instance.currentUser == null) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FirstPage(),
+                      ));
+                  return;
+                }
+                final u = FirebaseAuth.instance.currentUser;
                 for (String i in emailList) {
                   if (!EmailValidator.validate(i)) {
                     showDialog(
@@ -86,19 +116,27 @@ class WingMembers extends StatelessWidget {
                 for (String i in emailList) {
                   final doc =
                       FirebaseFirestore.instance.collection("users").doc(i);
-                  await doc.set({
-                    'email': i,
-                    'wingChosen':selected.wingId
-                  });
+                  await doc.set({'email': i, 'wingChosen': selected.wingId});
                 }
-                selected.isAvailable = false;
-                selected.setFill = Colors.grey;
+                final doc = FirebaseFirestore.instance
+                    .collection("users")
+                    .doc(u!.email);
+                await doc.set({
+                  'email': u.email,
+                  'wingChosen': selected.wingId
+                }).then((value) => print("YO"));
+
+                found.isAvailable = false;
+                found.setFill = Colors.grey;
                 for (WingModel w in wingList) {
                   final doc = FirebaseFirestore.instance
                       .collection("vishwakarma")
                       .doc(w.wingId.toString());
                   doc.set(w.toJson());
                 }
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: ((context) =>
+                        AfterSelection(wingChosen: found.wingId))));
               },
               style: TextButton.styleFrom(
                   foregroundColor: MyColors.buttonTextColor),

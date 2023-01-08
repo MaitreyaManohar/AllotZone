@@ -1,3 +1,4 @@
+import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/wing_selection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,21 +11,29 @@ class FirstPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  
-
   Future signIn(BuildContext context, String email, String password) async {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+
       final doc = FirebaseFirestore.instance.collection("users").doc(email);
-      await doc.set(
-        {
-          'email':email
-        }
-      );
-      Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: 
-      ((context) => const WingSelection())
-      ));
+      final check = await doc.get();
+      print(check.data());
+      if (check.data()!['email'] != null &&
+          check.data()!['wingChosen'] != null) {
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: ((context) {
+          return AfterSelection(
+            wingChosen: check.data()!['wingChosen'],
+          );
+        })));
+        return;
+      } else {
+        await doc.set({'email': email});
+
+        Navigator.of(context).pushReplacement(new MaterialPageRoute(
+            builder: ((context) => const WingSelection())));
+      }
     } on FirebaseAuthException catch (e) {
       showDialog(
           context: context,
@@ -34,7 +43,6 @@ class FirstPage extends StatelessWidget {
                 content: Text(e.toString()),
               )));
     }
-
   }
 
   Future signUp(BuildContext context, String email, String password) async {
@@ -45,18 +53,29 @@ class FirstPage extends StatelessWidget {
     try {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: 
-      ((context) => const WingSelection())
-      ));
       final doc = FirebaseFirestore.instance.collection("users").doc(email);
-      await doc.set(
-        {
-          'email':email
+      final check = await doc.get();
+      print(check.data());
+      if (check.data() != null) {
+        final s = check.data()!;
+        print("We are here");
+        if (s['wingChosen'] == null) {
+          Navigator.of(context).pushReplacement(new MaterialPageRoute(
+              builder: ((context) => const WingSelection())));
+        } else {
+          Navigator.of(context).pushReplacement(new MaterialPageRoute(
+              builder: ((context) =>
+                  AfterSelection(wingChosen: check.data()!['wingChosen']))));
         }
-      );
+      } else {
+        Navigator.of(context).pushReplacement(new MaterialPageRoute(
+            builder: ((context) => const WingSelection())));
+        await doc.set({'email': email});
+      }
     } on FirebaseAuthException catch (e) {
       print(e.code);
       if (e.code == 'email-already-in-use') {
+        print("OK");
         signIn(context, email, password);
       } else {
         showDialog(
