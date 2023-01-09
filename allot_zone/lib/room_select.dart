@@ -1,5 +1,7 @@
 import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/Components/room.dart';
+import 'package:allot_zone/wing_members.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -12,6 +14,7 @@ class RoomSelection extends StatefulWidget {
 }
 
 class _RoomSelectionState extends State<RoomSelection> {
+  List<int> selectedList = [];
   final floorList = [1, 2, 3, 4];
   int floorSelected = 1;
   @override
@@ -51,9 +54,45 @@ class _RoomSelectionState extends State<RoomSelection> {
           ),
           RoomLayout(
             floorSelected: floorSelected,
+            selectedList: selectedList,
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: ((context) {
+                  return AlertDialog(
+                    backgroundColor: Colors.grey,
+                    content: const Text("Are you sure about your selection?"),
+                    actions: [
+                      TextButton(
+                        style: TextButton.styleFrom(
+                            backgroundColor: MyColors.buttonBackground),
+                        onPressed: () {
+                          print(selectedList);
+                          Navigator.of(context).push(MaterialPageRoute(builder: ((context) {
+                            return WingMembers(selectedList: selectedList);
+                          })));
+                        },
+                        child: Text(
+                          'Yes',
+                          style: TextStyle(color: MyColors.buttonTextColor),
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                            backgroundColor: MyColors.buttonBackground),
+                        onPressed: () {},
+                        child: Text(
+                          'No',
+                          style: TextStyle(color: MyColors.buttonTextColor),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              );
+            },
             style: TextButton.styleFrom(
                 backgroundColor: MyColors.buttonBackground,
                 foregroundColor: MyColors.buttonTextColor),
@@ -69,7 +108,7 @@ class RoomLayout extends StatelessWidget {
   final floorSelected;
   List<int> selectedList = [];
 
-  RoomLayout({Key? key, required this.floorSelected}) : super(key: key);
+  RoomLayout({Key? key, required this.floorSelected,required this.selectedList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

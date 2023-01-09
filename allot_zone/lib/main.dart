@@ -49,7 +49,7 @@ class AllotZone extends StatelessWidget {
 
           )
         ),
-        home: Scaffold(
+        home: const Scaffold(
           body: RoomSelection(),
         ));
   }

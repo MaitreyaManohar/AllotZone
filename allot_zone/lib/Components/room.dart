@@ -5,7 +5,11 @@ class Room extends StatefulWidget {
   final int roomNo;
   final bool isAvailable;
   final List selectedList;
-  const Room({super.key, required this.selectedList,required this.roomNo, required this.isAvailable});
+  const Room(
+      {super.key,
+      required this.selectedList,
+      required this.roomNo,
+      required this.isAvailable});
 
   @override
   State<Room> createState() => _RoomState();
@@ -18,15 +22,23 @@ class _RoomState extends State<Room> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        if (widget.selectedList.length >4 && fillColor==Colors.transparent) {
+          showDialog(
+            context: context,
+            builder: ((context) => const AlertDialog(
+                  backgroundColor: Colors.grey,
+                  content: Text("You can only select upto 5 rooms"),
+                )),
+          );
+          return;
+        }
         setState(() {
-          print(widget.selectedList);
-          if(isSelected){
-            isSelected=false;
+          if (isSelected) {
+            isSelected = false;
             widget.selectedList.remove(widget.roomNo);
             fillColor = Colors.transparent;
-          }
-          else{
-            isSelected= true;
+          } else {
+            isSelected = true;
             widget.selectedList.add(widget.roomNo);
             fillColor = MyColors.buttonBackground;
           }
@@ -38,7 +50,7 @@ class _RoomState extends State<Room> {
           decoration: BoxDecoration(
               border: Border.all(color: MyColors.buttonTextColor),
               borderRadius: BorderRadius.circular(2),
-              color: widget.isAvailable ? fillColor: Colors.grey),
+              color: widget.isAvailable ? fillColor : Colors.grey),
           height: 22,
           width: 22,
           child: Center(
