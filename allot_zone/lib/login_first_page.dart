@@ -1,97 +1,11 @@
-import 'package:allot_zone/after_selection.dart';
-import 'package:allot_zone/wing_selection.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'Colors.dart';
 
 class FirstPage extends StatelessWidget {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  Future signIn(BuildContext context, String email, String password) async {
-    try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
-
-      final doc = FirebaseFirestore.instance.collection("users").doc(email);
-      final check = await doc.get();
-      print(check.data());
-      if (check.data()!['email'] != null &&
-          check.data()!['wingChosen'] != null) {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: ((context) {
-          return AfterSelection(
-            wingChosen: check.data()!['wingChosen'],
-          );
-        })));
-        return;
-      } else {
-        await doc.set({'email': email});
-
-        Navigator.of(context).pushReplacement(new MaterialPageRoute(
-            builder: ((context) => const WingSelection())));
-      }
-    } on FirebaseAuthException catch (e) {
-      showDialog(
-          context: context,
-          builder: ((context) => AlertDialog(
-                backgroundColor: Colors.grey,
-                title: const Text("Wrong password"),
-                content: Text(e.toString()),
-              )));
-    }
-  }
-
-  Future signUp(BuildContext context, String email, String password) async {
-    // showDialog(
-    //     context: context,
-    //     builder: ((context) => const CircularProgressIndicator()));
-
-    try {
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      final doc = FirebaseFirestore.instance.collection("users").doc(email);
-      final check = await doc.get();
-      print(check.data());
-      if (check.data() != null) {
-        final s = check.data()!;
-        print("We are here");
-        if (s['wingChosen'] == null) {
-          Navigator.of(context).pushReplacement(new MaterialPageRoute(
-              builder: ((context) => const WingSelection())));
-        } else {
-          Navigator.of(context).pushReplacement(new MaterialPageRoute(
-              builder: ((context) =>
-                  AfterSelection(wingChosen: check.data()!['wingChosen']))));
-        }
-      } else {
-        Navigator.of(context).pushReplacement(new MaterialPageRoute(
-            builder: ((context) => const WingSelection())));
-        await doc.set({'email': email});
-      }
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
-      if (e.code == 'email-already-in-use') {
-        print("OK");
-        signIn(context, email, password);
-      } else {
-        showDialog(
-            context: context,
-            builder: ((context) {
-              return AlertDialog(
-                backgroundColor: Colors.grey,
-                title: const Text("Error"),
-                content: Text(e.toString()),
-              );
-            }));
-      }
-    }
-
-    // Navigator.of(context).pop();
-  }
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   FirstPage({super.key});
 
@@ -141,8 +55,8 @@ class FirstPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    obscureText: true,
                     controller: _passwordController,
+                    obscureText: true,
                     decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
                             borderRadius:
@@ -157,9 +71,66 @@ class FirstPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: TextButton(
-                    onPressed: () {
-                      signUp(context, _emailController.text,
-                          _passwordController.text);
+                    onPressed: () async {
+                      try {
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: _emailController.text,
+                            password: _passwordController.text);
+                      } on FirebaseAuthException catch (e) {
+                        if (e.code == 'user-not-found') {
+                          //Handling the possibility of a new account creation
+                          showDialog(
+                            context: context,
+                            builder: ((context) {
+                              return AlertDialog(
+                                content: const Text(
+                                    "You are creating a new account, do you want to create an account with the password that you entered?"),
+                                backgroundColor: Colors.grey,
+                                actions: [
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                        backgroundColor:
+                                            MyColors.buttonBackground),
+                                    onPressed: () async {
+                                      try {
+                                        await FirebaseAuth.instance
+                                            .createUserWithEmailAndPassword(
+                                                email: _emailController.text,
+                                                password:
+                                                    _passwordController.text);
+                                      } on FirebaseAuthException catch (e) {
+                                        showDialog(
+                                            context: context,
+                                            builder: ((context) => AlertDialog(
+                                                  content: Text(
+                                                      e.message.toString()),
+                                                )));
+                                      }
+                                    },
+                                    child: Text(
+                                      'Yes',
+                                      style: TextStyle(
+                                          color: MyColors.buttonTextColor),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                        backgroundColor:
+                                            MyColors.buttonBackground),
+                                    onPressed: (() =>
+                                        Navigator.of(context).pop()),
+                                    child: Text(
+                                      'No',
+                                      style: TextStyle(
+                                          color: MyColors.buttonTextColor),
+                                    ),
+                                  )
+                                ],
+                              );
+                            }),
+                          );
+                        }
+                      }
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(

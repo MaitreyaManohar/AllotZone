@@ -1,4 +1,5 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/splashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ Future main() async {
 class AllotZone extends StatelessWidget {
   const AllotZone({super.key});
 
+
+  //Function that creates a Color swatch 
   MaterialColor createMaterialColor(Color color) {
     List strengths = <double>[.05];
     Map<int, Color> swatch = {};
@@ -46,8 +49,8 @@ class AllotZone extends StatelessWidget {
 
           )
         ),
-        home: const Scaffold(
-          body: SplashScreen(),
+        home: Scaffold(
+          body: RoomSelection(),
         ));
   }
 }
