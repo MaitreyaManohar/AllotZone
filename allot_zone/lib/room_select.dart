@@ -110,6 +110,12 @@ class RoomLayout extends StatelessWidget {
 
   RoomLayout({Key? key, required this.floorSelected,required this.selectedList}) : super(key: key);
 
+  Future isAvailableReceive(int roomNo) async{
+    final doc = FirebaseFirestore.instance.collection('vishwakarma').doc(roomNo.toString());
+    final data = await doc.get();
+    return data.data()!['isAvailable'];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
