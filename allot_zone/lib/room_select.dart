@@ -28,6 +28,7 @@ class _RoomSelectionState extends State<RoomSelection> {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Padding(
             padding: const EdgeInsets.all(10),
@@ -61,6 +62,12 @@ class _RoomSelectionState extends State<RoomSelection> {
               showDialog(
                 context: context,
                 builder: ((context) {
+                  if(selectedList.isEmpty){
+                    return const AlertDialog(
+                      backgroundColor: Colors.grey,
+                      content: Text("Please select atleast one room!"),
+                    );
+                  }
                   return AlertDialog(
                     backgroundColor: Colors.grey,
                     content: const Text("Are you sure about your selection?"),
@@ -70,7 +77,9 @@ class _RoomSelectionState extends State<RoomSelection> {
                             backgroundColor: MyColors.buttonBackground),
                         onPressed: () {
                           print(selectedList);
-                          Navigator.of(context).push(MaterialPageRoute(builder: ((context) {
+                          Navigator.of(context).pop();
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: ((context) {
                             return WingMembers(selectedList: selectedList);
                           })));
                         },
@@ -82,7 +91,9 @@ class _RoomSelectionState extends State<RoomSelection> {
                       TextButton(
                         style: TextButton.styleFrom(
                             backgroundColor: MyColors.buttonBackground),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
                         child: Text(
                           'No',
                           style: TextStyle(color: MyColors.buttonTextColor),
@@ -104,148 +115,162 @@ class _RoomSelectionState extends State<RoomSelection> {
   }
 }
 
+
+
 class RoomLayout extends StatelessWidget {
   final floorSelected;
   List<int> selectedList = [];
 
-  RoomLayout({Key? key, required this.floorSelected,required this.selectedList}) : super(key: key);
+  RoomLayout(
+      {Key? key, required this.floorSelected, required this.selectedList})
+      : super(key: key);
 
-  Future isAvailableReceive(int roomNo) async{
-    final doc = FirebaseFirestore.instance.collection('vishwakarma').doc(roomNo.toString());
+  Future isAvailableReceive(int roomNo) async {
+    final doc = FirebaseFirestore.instance
+        .collection('vishwakarma')
+        .doc(roomNo.toString());
     final data = await doc.get();
     return data.data()!['isAvailable'];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(children: [
-          const SizedBox(
-            width: 42,
-          ),
-          ...List.generate(
-            10,
-            (index) => Room(
-              isAvailable: true,
-              selectedList: selectedList,
-              roomNo: floorSelected * 100 + index + 1,
+    return InteractiveViewer(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const SizedBox(
+              width: 0,
             ),
-          ),
-        ]),
-        Row(children: [
-          const SizedBox(
-            width: 42,
-          ),
-          ...List.generate(
-            10,
-            (index) => Room(
-              selectedList: selectedList,
-              isAvailable: true,
-              roomNo: floorSelected * 100 + index + 10,
-            ),
-          ),
-        ]),
-        Row(
-          children: [
-            Column(
-              children: List.generate(
-                10,
-                (index) => Row(
-                  children: [
-                    Room(
-                      selectedList: selectedList,
-                      isAvailable: true,
-                      roomNo: floorSelected * 100 + 20 + 2 * index,
-                    ),
-                    Room(
-                        selectedList: selectedList,
-                        roomNo: floorSelected * 100 + 20 + 2 * index + 1,
-                        isAvailable: true)
-                  ],
-                ),
+            ...List.generate(
+              10,
+              (index) => Room(
+                isAvailable: true,
+                selectedList: selectedList,
+                roomNo: floorSelected * 100 + index ,
               ),
             ),
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             const SizedBox(
-              width: 22 * 10,
-            ),
-            Column(
-              children: List.generate(
-                10,
-                (index) => Row(
-                  children: [
-                    Room(
-                      selectedList: selectedList,
-                      isAvailable: true,
-                      roomNo: floorSelected * 100 + 40 + 2 * index,
-                    ),
-                    Room(
-                        selectedList: selectedList,
-                        roomNo: floorSelected * 100 + 40 + 2 * index + 1,
-                        isAvailable: true)
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const SizedBox(
-              width: 44,
+              width: 0,
             ),
             ...List.generate(
               10,
               (index) => Room(
                 selectedList: selectedList,
                 isAvailable: true,
-                roomNo: floorSelected * 100 + 60 + index,
+                roomNo: floorSelected * 100 + index + 10,
               ),
             ),
-          ],
-        ),
-        Row(
-          children: [
-            const SizedBox(
-              width: 44,
-            ),
-            ...List.generate(
-              10,
-              (index) => Room(
-                selectedList: selectedList,
-                isAvailable: true,
-                roomNo: floorSelected * 100 + 70 + index,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            const SizedBox(
-              width: 22 * 12,
-            ),
-            Column(
-              children: List.generate(
-                10,
-                (index) => Row(
-                  children: [
-                    Room(
-                      selectedList: selectedList,
-                      isAvailable: true,
-                      roomNo: floorSelected * 100 + 80 + 2 * index,
-                    ),
-                    Room(
+          ]),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: List.generate(
+                  10,
+                  (index) => Row(
+                    children: [
+                      Room(
                         selectedList: selectedList,
-                        roomNo: floorSelected * 100 + 80 + 2 * index + 1,
-                        isAvailable: true)
-                  ],
+                        isAvailable: true,
+                        roomNo: floorSelected * 100 + 20 + 2 * index,
+                      ),
+                      Room(
+                          selectedList: selectedList,
+                          roomNo: floorSelected * 100 + 20 + 2 * index + 1,
+                          isAvailable: true)
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(
+                width: 22 * 10,
+              ),
+              Column(
+                children: List.generate(
+                  10,
+                  (index) => Row(
+                    children: [
+                      Room(
+                        selectedList: selectedList,
+                        isAvailable: true,
+                        roomNo: floorSelected * 100 + 40 + 2 * index,
+                      ),
+                      Room(
+                          selectedList: selectedList,
+                          roomNo: floorSelected * 100 + 40 + 2 * index + 1,
+                          isAvailable: true)
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 0,
+              ),
+              ...List.generate(
+                10,
+                (index) => Room(
+                  selectedList: selectedList,
+                  isAvailable: true,
+                  roomNo: floorSelected * 100 + 60 + index,
+                ),
+              ),
+            ],
+          ),
+          Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+    
+            children: [
+              const SizedBox(
+                width: 0,
+              ),
+              ...List.generate(
+                10,
+                (index) => Room(
+                  selectedList: selectedList,
+                  isAvailable: true,
+                  roomNo: floorSelected * 100 + 70 + index,
+                ),
+              ),
+            ],
+          ),
+          Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+    
+            children: [
+              const SizedBox(
+                width: 22 * 12,
+              ),
+              Column(
+                children: List.generate(
+                  10,
+                  (index) => Row(
+                    children: [
+                      Room(
+                        selectedList: selectedList,
+                        isAvailable: true,
+                        roomNo: floorSelected * 100 + 80 + 2 * index,
+                      ),
+                      Room(
+                          selectedList: selectedList,
+                          roomNo: floorSelected * 100 + 80 + 2 * index + 1,
+                          isAvailable: true)
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

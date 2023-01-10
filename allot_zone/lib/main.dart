@@ -1,4 +1,5 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/login_first_page.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/splashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,8 +50,8 @@ class AllotZone extends StatelessWidget {
 
           )
         ),
-        home: const Scaffold(
-          body: RoomSelection(),
+        home: Scaffold(
+          body: FirstPage(),
         ));
   }
 }
