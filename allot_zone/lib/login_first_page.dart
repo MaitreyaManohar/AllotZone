@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -105,6 +106,11 @@ class FirstPage extends StatelessWidget {
                                                   content: Text(
                                                       e.message.toString()),
                                                 )));
+                                      }
+                                      final doc = FirebaseFirestore.instance.collection('users').doc(_emailController.text);
+                                      final data = await doc.get();
+                                      if(data.data()!=null && data.data()!['wingChosen']!=null){
+                                        
                                       }
                                     },
                                     child: Text(
