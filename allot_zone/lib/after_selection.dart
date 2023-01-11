@@ -1,29 +1,40 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:allot_zone/login_first_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 
 class AfterSelection extends StatelessWidget {
-  String? email;
-  int wingChosen;
-  AfterSelection({super.key, required this.wingChosen}) {
-    final u = FirebaseAuth.instance.currentUser;
-    final doc = FirebaseFirestore.instance.collection('users').doc(u!.email);
-    email = u.email;
-  }
+  final int roomNo;
+
+  const AfterSelection({super.key, required this.roomNo});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('AllotZone'),
+        title: const Text(
+          'AllotZone',
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(
+          Icons.home,
+        ),
+        onPressed: () {
+
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: ((context) => FirstPage())));
+        },
       ),
       body: Center(
+        
         child: Text(
-          'You have chosen wing $wingChosen',
-          style: TextStyle(fontSize: 30),
+          "Congratulations !\nYou have selected room VK$roomNo",
+         textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 25,
+          ),
         ),
       ),
     );
