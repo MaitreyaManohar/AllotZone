@@ -62,7 +62,7 @@ class _RoomSelectionState extends State<RoomSelection> {
               showDialog(
                 context: context,
                 builder: ((context) {
-                  if(selectedList.isEmpty){
+                  if (selectedList.isEmpty) {
                     return const AlertDialog(
                       backgroundColor: Colors.grey,
                       content: Text("Please select atleast one room!"),
@@ -114,8 +114,6 @@ class _RoomSelectionState extends State<RoomSelection> {
   }
 }
 
-
-
 class RoomLayout extends StatelessWidget {
   final floorSelected;
   List<int> selectedList = [];
@@ -147,7 +145,7 @@ class RoomLayout extends StatelessWidget {
               (index) => Room(
                 isAvailable: true,
                 selectedList: selectedList,
-                roomNo: floorSelected * 100 + index ,
+                roomNo: floorSelected * 100 + index,
               ),
             ),
           ]),
@@ -225,8 +223,7 @@ class RoomLayout extends StatelessWidget {
             ],
           ),
           Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-    
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(
                 width: 0,
@@ -242,8 +239,7 @@ class RoomLayout extends StatelessWidget {
             ],
           ),
           Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-    
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(
                 width: 22 * 12,

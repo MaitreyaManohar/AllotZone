@@ -28,8 +28,10 @@ class AfterSelection extends StatelessWidget {
         },
       ),
       body: Center(
+        
         child: Text(
-          "You have selected room VK$roomNo",
+          "Congratulations !\nYou have selected room VK$roomNo",
+         textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 25,
           ),

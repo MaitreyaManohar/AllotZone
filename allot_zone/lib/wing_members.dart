@@ -25,6 +25,15 @@ class WingMembers extends StatelessWidget {
             )));
   }
 
+  void message(BuildContext context, String message) {
+    showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+              content: Text(message),
+              backgroundColor: Colors.grey,
+            )));
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> emailList =
@@ -119,7 +128,7 @@ class WingMembers extends StatelessWidget {
                       return;
                     }
                   }
-                  print(emailList);
+
                   for (String s in emailList) {
                     if (!EmailValidator.validate(s)) {
                       showDialog(
@@ -160,50 +169,62 @@ class WingMembers extends StatelessWidget {
                             onPressed: () async {
                               loading(context);
                               for (String s in emailList) {
-                                final doc = FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(s);
-                                final data = await doc.get();
-                                if (data.data() != null &&
-                                    data.data()!['roomChosen'] != null) {
-                                  showDialog(
-                                      context: context,
-                                      builder: ((context) => AlertDialog(
-                                            alignment: Alignment.center,
-                                            backgroundColor: Colors.grey,
-                                            content: Text(
-                                                "Student with ${s} has already chosen a room"),
-                                          )));
-                                  return;
-                                }
+                                try {
+                                  final doc = FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(s);
+                                  final data = await doc.get();
+                                  if (data.data() != null &&
+                                      data.data()!['roomChosen'] != null) {
+                                    showDialog(
+                                        context: context,
+                                        builder: ((context) => AlertDialog(
+                                              alignment: Alignment.center,
+                                              backgroundColor: Colors.grey,
+                                              content: Text(
+                                                  "Student with ${s} has already chosen a room"),
+                                            )));
+                                    return;
+                                  }
+                                } on FirebaseAuthException catch (e) {}
                               }
-                              int roomChosen=0;
+
+                              int roomChosen = 0;
+                              loading(context);
                               for (int i = 0; i < emailList.length; i++) {
-                                if(emailList[i]==loggedIn.email){
-                                  roomChosen=selectedList[(i/2).floor()];
+                                if (emailList[i] == loggedIn.email) {
+                                  roomChosen = selectedList[(i / 2).floor()];
                                 }
+
                                 final doc = FirebaseFirestore.instance
                                     .collection('users')
                                     .doc(emailList[i]);
+                                try {
+                                  
+                                  await doc.set({
+                                    'email': emailList[i],
+                                    'roomChosen': selectedList[(i / 2).floor()]
+                                  });
+                                  final wing = FirebaseFirestore.instance
+                                      .collection('vishwakarma')
+                                      .doc(selectedList[(i / 2).floor()]
+                                          .toString());
+                                  await wing.set({'isAvailable': false});
 
-                                await doc.set({
-                                  'email': emailList[i],
-                                  'roomChosen': selectedList[(i / 2).floor()]
-                                });
-                                final wing = FirebaseFirestore.instance
-                                    .collection('vishwakarma')
-                                    .doc(selectedList[(i / 2).floor()]
-                                        .toString());
-                                await wing.set({'isAvailable': false});
+                                } on FirebaseAuthException catch (e) {
+                                  message(context, e.message.toString());
+                                }
                               }
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
-                              
+                              Navigator.of(context).pop();
+
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: ((context) => AfterSelection(roomNo: roomChosen))));
+                                      builder: ((context) =>
+                                          AfterSelection(roomNo: roomChosen))));
                             },
                             child: Text(
                               'Yes',

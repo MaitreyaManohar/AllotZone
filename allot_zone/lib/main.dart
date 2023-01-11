@@ -40,6 +40,7 @@ class AllotZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: createMaterialColor(const Color.fromARGB(255, 255, 214, 10)),
           scaffoldBackgroundColor: const Color.fromARGB(255, 48, 48, 48),
@@ -50,8 +51,8 @@ class AllotZone extends StatelessWidget {
 
           )
         ),
-        home: Scaffold(
-          body: FirstPage(),
+        home: const Scaffold(
+          body: SplashScreen(),
         ));
   }
 }

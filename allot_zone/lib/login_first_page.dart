@@ -3,15 +3,26 @@ import 'package:allot_zone/room_select.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'Colors.dart';
 
 class FirstPage extends StatelessWidget {
+  FirstPage({super.key});
+
   final _emailController = TextEditingController();
+
   final _passwordController = TextEditingController();
 
-  FirstPage({super.key});
+  void message(BuildContext context, String message) {
+    showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+              content: Text(message),
+              backgroundColor: Colors.grey,
+            )));
+  }
 
   void loading(BuildContext context) {
     //Loading Progress indicator
@@ -35,7 +46,7 @@ class FirstPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           const Padding(
-            padding: EdgeInsets.all(10.0),
+            padding: EdgeInsets.all(5.0),
             child: Center(
               child: Text(
                 "Welcome To \n Allot Zone!",
@@ -82,27 +93,17 @@ class FirstPage extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
                   child: TextButton(
-                    // onPressed: ()async {
-                    //   final doc = FirebaseFirestore.instance.collection('vishwakarma');
-                    //   for(int i = 100;i<=400;i++){
-                    //     final data = doc.doc(i.toString());
-                    //     await data.set({
-                    //       'isAvailable':true
-                    //     });
-                    //   }
-                    // },
-
                     //Login or Signup Button
                     onPressed: () async {
-
-
                       //Checking if the given email is valid
-                      if (!EmailValidator.validate(_emailController.text)) {
+                      if (!EmailValidator.validate(
+                          _emailController.text.trim())) {
                         showDialog(
                             context: context,
                             builder: ((context) => const AlertDialog(
+                                  backgroundColor: Colors.grey,
                                   content: Text("Please enter a valid email"),
                                 )));
                         return;
@@ -118,8 +119,8 @@ class FirstPage extends StatelessWidget {
                       try {
                         //Signing in with given email and password
                         await FirebaseAuth.instance.signInWithEmailAndPassword(
-                            email: _emailController.text,
-                            password: _passwordController.text);
+                            email: _emailController.text.trim(),
+                            password: _passwordController.text.trim());
 
                         Navigator.of(context)
                             .pop(); //Popping progress indicator after logging in
@@ -127,14 +128,15 @@ class FirstPage extends StatelessWidget {
                         loading(context);
                         final doc = FirebaseFirestore.instance
                             .collection('users')
-                            .doc(_emailController.text);
+                            .doc(_emailController.text.trim());
                         final data = await doc.get();
                         Navigator.of(context).pop();
                         if (data.data() != null &&
                             data.data()!['roomChosen'] != null) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: ((context) => AfterSelection(
-                                  roomNo: data.data()!['roomChosen']))));
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: ((context) => AfterSelection(
+                                      roomNo: data.data()!['roomChosen']))));
                           return;
                         }
 
@@ -174,16 +176,18 @@ class FirstPage extends StatelessWidget {
                                         loading(context);
                                         await FirebaseAuth.instance
                                             .createUserWithEmailAndPassword(
-                                                email: _emailController.text,
-                                                password:
-                                                    _passwordController.text);
+                                                email: _emailController.text
+                                                    .trim(),
+                                                password: _passwordController
+                                                    .text
+                                                    .trim());
                                         //Popping progress indicator after logging in
                                         Navigator.pop(context);
 
                                         loading(context);
                                         final doc = FirebaseFirestore.instance
                                             .collection('users')
-                                            .doc(_emailController.text);
+                                            .doc(_emailController.text.trim());
                                         final data = await doc.get();
                                         Navigator.pop(context);
 
@@ -212,6 +216,7 @@ class FirstPage extends StatelessWidget {
                                         showDialog(
                                             context: context,
                                             builder: ((context) => AlertDialog(
+                                                  backgroundColor: Colors.grey,
                                                   content: Text(
                                                       e.message.toString()),
                                                 )));
@@ -265,7 +270,78 @@ class FirstPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                )
+                ),
+                TextButton(
+                  onPressed: () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: Colors.grey,
+                            content: const Text(
+                                "Please make sure you typed the email of your account in the email text field. If you have, click on continue ."),
+                            actions: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                    backgroundColor: MyColors.buttonBackground),
+                                onPressed: () async {
+                                  try {
+                                    loading(context);
+                                    final list = await FirebaseAuth.instance
+                                        .fetchSignInMethodsForEmail(
+                                            _emailController.text.trim());
+
+                                    if (list.isEmpty) {
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                      message(context, "User does not exist");
+
+                                      return;
+                                    }
+
+                                    await FirebaseAuth.instance
+                                        .sendPasswordResetEmail(
+                                            email:
+                                                _emailController.text.trim());
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+
+                                    message(context,
+                                        "Reset password email has been sent succesfully");
+                                  } on FirebaseAuthException catch (e) {
+                                    message(context, e.message.toString());
+                                  }
+                                },
+                                child: Text(
+                                  'Continue',
+                                  style: TextStyle(
+                                      color: MyColors.buttonTextColor),
+                                ),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                    backgroundColor: MyColors.buttonBackground),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                      color: MyColors.buttonTextColor),
+                                ),
+                              ),
+                            ],
+                          );
+                        });
+                  },
+                  child: const Text(
+                    "Forgot Password",
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Color.fromARGB(255, 173, 243, 33),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
