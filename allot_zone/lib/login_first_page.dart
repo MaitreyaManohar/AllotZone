@@ -1,6 +1,8 @@
+
 import 'package:allot_zone/after_selection.dart';
-import 'package:allot_zone/wing_selection.dart';
+import 'package:allot_zone/room_select.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -8,92 +10,29 @@ import 'package:flutter/material.dart';
 import 'Colors.dart';
 
 class FirstPage extends StatelessWidget {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  Future signIn(BuildContext context, String email, String password) async {
-    try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
-
-      final doc = FirebaseFirestore.instance.collection("users").doc(email);
-      final check = await doc.get();
-      print(check.data());
-      if (check.data()!['email'] != null &&
-          check.data()!['wingChosen'] != null) {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: ((context) {
-          return AfterSelection(
-            wingChosen: check.data()!['wingChosen'],
-          );
-        })));
-        return;
-      } else {
-        await doc.set({'email': email});
-
-        Navigator.of(context).pushReplacement(new MaterialPageRoute(
-            builder: ((context) => const WingSelection())));
-      }
-    } on FirebaseAuthException catch (e) {
-      showDialog(
-          context: context,
-          builder: ((context) => AlertDialog(
-                backgroundColor: Colors.grey,
-                title: const Text("Wrong password"),
-                content: Text(e.toString()),
-              )));
-    }
-  }
-
-  Future signUp(BuildContext context, String email, String password) async {
-    // showDialog(
-    //     context: context,
-    //     builder: ((context) => const CircularProgressIndicator()));
-
-    try {
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
-      final doc = FirebaseFirestore.instance.collection("users").doc(email);
-      final check = await doc.get();
-      print(check.data());
-      if (check.data() != null) {
-        final s = check.data()!;
-        print("We are here");
-        if (s['wingChosen'] == null) {
-          Navigator.of(context).pushReplacement(new MaterialPageRoute(
-              builder: ((context) => const WingSelection())));
-        } else {
-          Navigator.of(context).pushReplacement(new MaterialPageRoute(
-              builder: ((context) =>
-                  AfterSelection(wingChosen: check.data()!['wingChosen']))));
-        }
-      } else {
-        Navigator.of(context).pushReplacement(new MaterialPageRoute(
-            builder: ((context) => const WingSelection())));
-        await doc.set({'email': email});
-      }
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
-      if (e.code == 'email-already-in-use') {
-        print("OK");
-        signIn(context, email, password);
-      } else {
-        showDialog(
-            context: context,
-            builder: ((context) {
-              return AlertDialog(
-                backgroundColor: Colors.grey,
-                title: const Text("Error"),
-                content: Text(e.toString()),
-              );
-            }));
-      }
-    }
-
-    // Navigator.of(context).pop();
-  }
-
   FirstPage({super.key});
+
+  final _emailController = TextEditingController();
+
+  final _passwordController = TextEditingController();
+
+  void message(BuildContext context, String message) {
+    showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+              content: Text(message),
+              backgroundColor: Colors.grey,
+            )));
+  }
+
+  void loading(BuildContext context) {
+    //Loading Progress indicator
+    showDialog(
+        context: context,
+        builder: ((context) => const Center(
+              child: CircularProgressIndicator(),
+            )));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +47,7 @@ class FirstPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           const Padding(
-            padding: EdgeInsets.all(10.0),
+            padding: EdgeInsets.all(5.0),
             child: Center(
               child: Text(
                 "Welcome To \n Allot Zone!",
@@ -141,8 +80,8 @@ class FirstPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    obscureText: true,
                     controller: _passwordController,
+                    obscureText: true,
                     decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(
                             borderRadius:
@@ -155,11 +94,175 @@ class FirstPage extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
                   child: TextButton(
-                    onPressed: () {
-                      signUp(context, _emailController.text,
-                          _passwordController.text);
+                    //Login or Signup Button
+                    onPressed: () async {
+                      // for (int i = 100; i <= 499; i++) {
+                      //   final doc = FirebaseFirestore.instance
+                      //       .collection('vishwakarma')
+                      //       .doc(i.toString());
+                      //   await doc.set({
+                      //     'isAvailable': true,
+                      //   });
+                      // }
+
+                      //Checking if the given email is valid
+                      if (!EmailValidator.validate(
+                          _emailController.text.trim())) {
+                        showDialog(
+                            context: context,
+                            builder: ((context) => const AlertDialog(
+                                  backgroundColor: Colors.grey,
+                                  content: Text("Please enter a valid email"),
+                                )));
+                        return;
+                      }
+
+                      //Loading Progress indicator
+                      showDialog(
+                          context: context,
+                          builder: ((context) => const Center(
+                                child: CircularProgressIndicator(),
+                              )));
+
+                      try {
+                        //Signing in with given email and password
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: _emailController.text.trim(),
+                            password: _passwordController.text.trim());
+
+                        Navigator.of(context)
+                            .pop(); //Popping progress indicator after logging in
+
+                        loading(context);
+                        final doc = FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(_emailController.text.trim());
+                        final data = await doc.get();
+                        Navigator.of(context).pop();
+                        if (data.data() != null &&
+                            data.data()!['roomChosen'] != null) {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: ((context) => AfterSelection(
+                                      roomNo: data.data()!['roomChosen']))));
+                          return;
+                        }
+
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => const RoomSelection())));
+                        return;
+                      } on FirebaseAuthException catch (e) {
+                        //Popping the circular progress indicator
+                        Navigator.of(context).pop();
+                        if (e.code == 'user-not-found') {
+                          //Handling the possibility of a new account creation
+                          showDialog(
+                            context: context,
+                            builder: ((context) {
+                              return AlertDialog(
+                                content: const Text(
+                                    "You are creating a new account, do you want to create an account with the password that you entered?"),
+                                backgroundColor: Colors.grey,
+                                actions: [
+                                  //Yes button in the dialogue
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                        backgroundColor:
+                                            MyColors.buttonBackground),
+                                    onPressed: () async {
+                                      //Loading Progress indicator
+                                      // showDialog(
+                                      //     context: context,
+                                      //     builder: ((context) => const Center(
+                                      //           child:
+                                      //               CircularProgressIndicator(),
+                                      //         )));
+
+                                      try {
+                                        loading(context);
+                                        await FirebaseAuth.instance
+                                            .createUserWithEmailAndPassword(
+                                                email: _emailController.text
+                                                    .trim(),
+                                                password: _passwordController
+                                                    .text
+                                                    .trim());
+                                        //Popping progress indicator after logging in
+                                        Navigator.pop(context);
+
+                                        loading(context);
+                                        final doc = FirebaseFirestore.instance
+                                            .collection('users')
+                                            .doc(_emailController.text.trim());
+                                        final data = await doc.get();
+                                        Navigator.pop(context);
+
+                                        if (data.data() != null &&
+                                            data.data()!['roomChosen'] !=
+                                                null) {
+                                          Navigator.pop(
+                                              context); //Popping the creating account alert box
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: ((context) =>
+                                                      AfterSelection(
+                                                          roomNo: data.data()![
+                                                              'roomChosen']))));
+                                          return;
+                                        }
+                                        Navigator.pop(
+                                            context); //Popping the creating account alert box
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: ((context) =>
+                                                    const RoomSelection())));
+                                        return;
+                                      } on FirebaseAuthException catch (e) {
+                                        showDialog(
+                                            context: context,
+                                            builder: ((context) => AlertDialog(
+                                                  backgroundColor: Colors.grey,
+                                                  content: Text(
+                                                      e.message.toString()),
+                                                )));
+                                      }
+                                    },
+                                    child: Text(
+                                      'Yes',
+                                      style: TextStyle(
+                                          color: MyColors.buttonTextColor),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                        backgroundColor:
+                                            MyColors.buttonBackground),
+                                    onPressed: (() =>
+                                        Navigator.of(context).pop()),
+                                    child: Text(
+                                      'No',
+                                      style: TextStyle(
+                                          color: MyColors.buttonTextColor),
+                                    ),
+                                  )
+                                ],
+                              );
+                            }),
+                          );
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: ((context) => AlertDialog(
+                                    content: Text(e.toString()),
+                                    backgroundColor: Colors.grey,
+                                  )));
+                        }
+                      }
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(
@@ -177,7 +280,78 @@ class FirstPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                )
+                ),
+                TextButton(
+                  onPressed: () async {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: Colors.grey,
+                            content: const Text(
+                                "Please make sure you typed the email of your account in the email text field. If you have, click on continue ."),
+                            actions: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                    backgroundColor: MyColors.buttonBackground),
+                                onPressed: () async {
+                                  try {
+                                    loading(context);
+                                    final list = await FirebaseAuth.instance
+                                        .fetchSignInMethodsForEmail(
+                                            _emailController.text.trim());
+
+                                    if (list.isEmpty) {
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                      message(context, "User does not exist");
+
+                                      return;
+                                    }
+
+                                    await FirebaseAuth.instance
+                                        .sendPasswordResetEmail(
+                                            email:
+                                                _emailController.text.trim());
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+
+                                    message(context,
+                                        "Reset password email has been sent succesfully");
+                                  } on FirebaseAuthException catch (e) {
+                                    message(context, e.message.toString());
+                                  }
+                                },
+                                child: Text(
+                                  'Continue',
+                                  style: TextStyle(
+                                      color: MyColors.buttonTextColor),
+                                ),
+                              ),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                    backgroundColor: MyColors.buttonBackground),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                      color: MyColors.buttonTextColor),
+                                ),
+                              ),
+                            ],
+                          );
+                        });
+                  },
+                  child: const Text(
+                    "Forgot Password",
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Color.fromARGB(255, 173, 243, 33),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

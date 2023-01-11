@@ -1,4 +1,6 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/login_first_page.dart';
+import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/splashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,8 @@ Future main() async {
 class AllotZone extends StatelessWidget {
   const AllotZone({super.key});
 
+
+  //Function that creates a Color swatch 
   MaterialColor createMaterialColor(Color color) {
     List strengths = <double>[.05];
     Map<int, Color> swatch = {};
@@ -36,6 +40,7 @@ class AllotZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primarySwatch: createMaterialColor(const Color.fromARGB(255, 255, 214, 10)),
           scaffoldBackgroundColor: const Color.fromARGB(255, 48, 48, 48),
