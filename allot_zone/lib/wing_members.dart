@@ -1,7 +1,11 @@
+import 'dart:developer';
+
+import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/login_first_page.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -11,6 +15,16 @@ import 'Colors.dart';
 class WingMembers extends StatelessWidget {
   final List selectedList;
   const WingMembers({super.key, required this.selectedList});
+
+  void loading(BuildContext context) {
+    //Loading Progress indicator
+    showDialog(
+        context: context,
+        builder: ((context) => const Center(
+              child: CircularProgressIndicator(),
+            )));
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> emailList =
@@ -79,6 +93,13 @@ class WingMembers extends StatelessWidget {
               child: TextButton(
                 //Confirm emails button
                 onPressed: () async {
+                  User? loggedIn = FirebaseAuth.instance.currentUser;
+                  if (loggedIn == null) {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: ((context) => FirstPage())));
+                    return;
+                  }
+
                   for (int i in selectedList) {
                     final collection =
                         FirebaseFirestore.instance.collection('vishwakarma');
@@ -111,6 +132,20 @@ class WingMembers extends StatelessWidget {
                       return;
                     }
                   }
+
+                  if (!emailList.contains(loggedIn.email)) {
+                    showDialog(
+                        context: context,
+                        builder: ((context) => const AlertDialog(
+                              alignment: Alignment.center,
+                              backgroundColor: Colors.grey,
+                              content: Text(
+                                  "Your email has to be included in one of these rooms"),
+                            )));
+                    return;
+                  }
+
+                  //Dialog to show confirmation message on emails
                   showDialog(
                     context: context,
                     builder: ((context) {
@@ -123,10 +158,34 @@ class WingMembers extends StatelessWidget {
                             style: TextButton.styleFrom(
                                 backgroundColor: MyColors.buttonBackground),
                             onPressed: () async {
+                              loading(context);
+                              for (String s in emailList) {
+                                final doc = FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(s);
+                                final data = await doc.get();
+                                if (data.data() != null &&
+                                    data.data()!['roomChosen'] != null) {
+                                  showDialog(
+                                      context: context,
+                                      builder: ((context) => AlertDialog(
+                                            alignment: Alignment.center,
+                                            backgroundColor: Colors.grey,
+                                            content: Text(
+                                                "Student with ${s} has already chosen a room"),
+                                          )));
+                                  return;
+                                }
+                              }
+                              int roomChosen=0;
                               for (int i = 0; i < emailList.length; i++) {
+                                if(emailList[i]==loggedIn.email){
+                                  roomChosen=selectedList[(i/2).floor()];
+                                }
                                 final doc = FirebaseFirestore.instance
                                     .collection('users')
                                     .doc(emailList[i]);
+
                                 await doc.set({
                                   'email': emailList[i],
                                   'roomChosen': selectedList[(i / 2).floor()]
@@ -137,12 +196,14 @@ class WingMembers extends StatelessWidget {
                                         .toString());
                                 await wing.set({'isAvailable': false});
                               }
-                              print(emailList);
                               Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                              
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: ((context) => FirstPage())));
+                                      builder: ((context) => AfterSelection(roomNo: roomChosen))));
                             },
                             child: Text(
                               'Yes',

@@ -84,8 +84,20 @@ class FirstPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: TextButton(
+                    // onPressed: ()async {
+                    //   final doc = FirebaseFirestore.instance.collection('vishwakarma');
+                    //   for(int i = 100;i<=400;i++){
+                    //     final data = doc.doc(i.toString());
+                    //     await data.set({
+                    //       'isAvailable':true
+                    //     });
+                    //   }
+                    // },
+
                     //Login or Signup Button
                     onPressed: () async {
+
+
                       //Checking if the given email is valid
                       if (!EmailValidator.validate(_emailController.text)) {
                         showDialog(

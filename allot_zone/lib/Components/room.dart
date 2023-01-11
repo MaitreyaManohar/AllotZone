@@ -64,9 +64,7 @@ class _RoomState extends State<Room> {
                   isSelected = false;
                 }
               });
-              print("After " + snapshot.data.toString());
-
-              print(widget.selectedList);
+              
             },
             child: Padding(
               padding: const EdgeInsets.all(0.0),

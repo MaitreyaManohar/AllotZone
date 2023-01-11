@@ -76,7 +76,6 @@ class _RoomSelectionState extends State<RoomSelection> {
                         style: TextButton.styleFrom(
                             backgroundColor: MyColors.buttonBackground),
                         onPressed: () {
-                          print(selectedList);
                           Navigator.of(context).pop();
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: ((context) {
