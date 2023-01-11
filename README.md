@@ -4,7 +4,7 @@
  
  The app can be downloaded from 
  
- ##Features
+ ## Features
   - Sign in with email id and password.
   - Forgot password.
   - Selection of rooms from different floors.
