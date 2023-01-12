@@ -8,5 +8,10 @@
   - Sign in with email id and password.
   - Forgot password.
   - Selection of rooms from different floors.
-  - Several users can choose rooms at the same time, will not lead to data discrepency. 
+  - Once selecteed, a user cannot select a room again. He will have to contact the admin to change his selection. 
+
+
+### To be added features
+ - Avoid data discrepancy
+ - Implement creation of layout by the manager
   
