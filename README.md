@@ -2,7 +2,7 @@
  Hey buddies, this is a hostel allotment app that I made using flutter.
  Unfortunately, since I don't have a Mac/Macintosh I couldn't build the app for IOS devices. 
  
- The app can be downloaded from 
+ Please download app-release.apk in the root directory to try the app
  
  ## Features
   - Sign in with email id and password.
