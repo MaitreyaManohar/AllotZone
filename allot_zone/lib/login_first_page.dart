@@ -1,4 +1,3 @@
-
 import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,7 +12,7 @@ class FirstPage extends StatelessWidget {
   FirstPage({super.key});
 
   final _emailController = TextEditingController();
-
+  final _confirmPasswordController = TextEditingController();
   final _passwordController = TextEditingController();
 
   void message(BuildContext context, String message) {
@@ -42,6 +41,21 @@ class FirstPage extends StatelessWidget {
         title: const Text(
           'AllotZone',
         ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+                backgroundColor: Colors.transparent),
+            onPressed: ()async {
+              loading(context);
+              await FirebaseAuth.instance.signOut();
+              Navigator.pop(context);
+            },
+            child: Text(
+              'SignOut',
+              style: TextStyle(color: MyColors.buttonTextColor),
+            ),
+          )
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -108,7 +122,7 @@ class FirstPage extends StatelessWidget {
                         //     'isAvailable': true,
                         //   });
                         // }
-            
+
                         //Checking if the given email is valid
                         if (!EmailValidator.validate(
                             _emailController.text.trim())) {
@@ -120,23 +134,24 @@ class FirstPage extends StatelessWidget {
                                   )));
                           return;
                         }
-            
+
                         //Loading Progress indicator
                         showDialog(
                             context: context,
                             builder: ((context) => const Center(
                                   child: CircularProgressIndicator(),
                                 )));
-            
+
                         try {
                           //Signing in with given email and password
-                          await FirebaseAuth.instance.signInWithEmailAndPassword(
-                              email: _emailController.text.trim(),
-                              password: _passwordController.text.trim());
-            
+                          await FirebaseAuth.instance
+                              .signInWithEmailAndPassword(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text.trim());
+
                           Navigator.of(context)
                               .pop(); //Popping progress indicator after logging in
-            
+
                           loading(context);
                           final doc = FirebaseFirestore.instance
                               .collection('users')
@@ -151,11 +166,12 @@ class FirstPage extends StatelessWidget {
                                         roomNo: data.data()!['roomChosen']))));
                             return;
                           }
-            
+
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: ((context) => const RoomSelection())));
+                                  builder: ((context) =>
+                                      const RoomSelection())));
                           return;
                         } on FirebaseAuthException catch (e) {
                           //Popping the circular progress indicator
@@ -170,6 +186,25 @@ class FirstPage extends StatelessWidget {
                                       "You are creating a new account, do you want to create an account with the password that you entered?"),
                                   backgroundColor: Colors.grey,
                                   actions: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: TextField(
+                                        controller: _confirmPasswordController,
+                                        obscureText: true,
+                                        decoration: InputDecoration(
+                                            enabledBorder: OutlineInputBorder(
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(20)),
+                                                borderSide: BorderSide(
+                                                  color:
+                                                      MyColors.textFieldBorder,
+                                                )),
+                                            labelText: "Confirm password",
+                                            labelStyle: TextStyle(
+                                                color: MyColors.textColor)),
+                                      ),
+                                    ),
                                     //Yes button in the dialogue
                                     TextButton(
                                       style: TextButton.styleFrom(
@@ -183,8 +218,14 @@ class FirstPage extends StatelessWidget {
                                         //           child:
                                         //               CircularProgressIndicator(),
                                         //         )));
-            
+
                                         try {
+                                          if (_confirmPasswordController.text !=
+                                              _passwordController.text) {
+                                            message(context,
+                                                "Passwords do not match!");
+                                            return;
+                                          }
                                           loading(context);
                                           await FirebaseAuth.instance
                                               .createUserWithEmailAndPassword(
@@ -195,14 +236,15 @@ class FirstPage extends StatelessWidget {
                                                       .trim());
                                           //Popping progress indicator after logging in
                                           Navigator.pop(context);
-            
+
                                           loading(context);
                                           final doc = FirebaseFirestore.instance
                                               .collection('users')
-                                              .doc(_emailController.text.trim());
+                                              .doc(
+                                                  _emailController.text.trim());
                                           final data = await doc.get();
                                           Navigator.pop(context);
-            
+
                                           if (data.data() != null &&
                                               data.data()!['roomChosen'] !=
                                                   null) {
@@ -212,7 +254,8 @@ class FirstPage extends StatelessWidget {
                                                 MaterialPageRoute(
                                                     builder: ((context) =>
                                                         AfterSelection(
-                                                            roomNo: data.data()![
+                                                            roomNo: data
+                                                                    .data()![
                                                                 'roomChosen']))));
                                             return;
                                           }
@@ -227,8 +270,10 @@ class FirstPage extends StatelessWidget {
                                         } on FirebaseAuthException catch (e) {
                                           showDialog(
                                               context: context,
-                                              builder: ((context) => AlertDialog(
-                                                    backgroundColor: Colors.grey,
+                                              builder: ((context) =>
+                                                  AlertDialog(
+                                                    backgroundColor:
+                                                        Colors.grey,
                                                     content: Text(
                                                         e.message.toString()),
                                                   )));
@@ -269,7 +314,8 @@ class FirstPage extends StatelessWidget {
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
                             MyColors.buttonBackground),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18.0),
                           ),
@@ -295,29 +341,30 @@ class FirstPage extends StatelessWidget {
                               actions: [
                                 TextButton(
                                   style: TextButton.styleFrom(
-                                      backgroundColor: MyColors.buttonBackground),
+                                      backgroundColor:
+                                          MyColors.buttonBackground),
                                   onPressed: () async {
                                     try {
                                       loading(context);
                                       final list = await FirebaseAuth.instance
                                           .fetchSignInMethodsForEmail(
                                               _emailController.text.trim());
-            
+
                                       if (list.isEmpty) {
                                         Navigator.pop(context);
                                         Navigator.pop(context);
                                         message(context, "User does not exist");
-            
+
                                         return;
                                       }
-            
+
                                       await FirebaseAuth.instance
                                           .sendPasswordResetEmail(
                                               email:
                                                   _emailController.text.trim());
                                       Navigator.pop(context);
                                       Navigator.pop(context);
-            
+
                                       message(context,
                                           "Reset password email has been sent succesfully");
                                     } on FirebaseAuthException catch (e) {
@@ -332,7 +379,8 @@ class FirstPage extends StatelessWidget {
                                 ),
                                 TextButton(
                                   style: TextButton.styleFrom(
-                                      backgroundColor: MyColors.buttonBackground),
+                                      backgroundColor:
+                                          MyColors.buttonBackground),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },

@@ -1,7 +1,9 @@
 import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/Components/room.dart';
+import 'package:allot_zone/login_first_page.dart';
 import 'package:allot_zone/wing_members.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -17,6 +19,17 @@ class _RoomSelectionState extends State<RoomSelection> {
   List<int> selectedList = [];
   final floorList = [1, 2, 3, 4];
   int floorSelected = 1;
+  int? a;
+
+  void loading(BuildContext context) {
+    //Loading Progress indicator
+    showDialog(
+        context: context,
+        builder: ((context) => const Center(
+              child: CircularProgressIndicator(),
+            )));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,6 +38,23 @@ class _RoomSelectionState extends State<RoomSelection> {
         title: const Text(
           'AllotZone',
         ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(backgroundColor: Colors.transparent),
+            onPressed: () async {
+              loading(context);
+              await FirebaseAuth.instance.signOut();
+              Navigator.pop(context);
+
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: ((context) => FirstPage())));
+            },
+            child: Text(
+              'SignOut',
+              style: TextStyle(color: MyColors.buttonTextColor),
+            ),
+          )
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

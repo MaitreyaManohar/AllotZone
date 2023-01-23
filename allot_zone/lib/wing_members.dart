@@ -128,7 +128,17 @@ class WingMembers extends StatelessWidget {
                       return;
                     }
                   }
-
+                  final uniqueEmail = emailList.toSet();
+                  if (uniqueEmail.length!=emailList.length){
+                    showDialog(
+                          context: context,
+                          builder: ((context) => const AlertDialog(
+                                alignment: Alignment.center,
+                                backgroundColor: Colors.grey,
+                                content: Text("Please remove duplicate emails"),
+                              )));
+                      return;
+                  }
                   for (String s in emailList) {
                     if (!EmailValidator.validate(s)) {
                       showDialog(
@@ -140,7 +150,9 @@ class WingMembers extends StatelessWidget {
                               )));
                       return;
                     }
+                    
                   }
+                  
 
                   if (!emailList.contains(loggedIn.email)) {
                     showDialog(
@@ -215,6 +227,7 @@ class WingMembers extends StatelessWidget {
                                   message(context, e.message.toString());
                                 }
                               }
+                              
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();

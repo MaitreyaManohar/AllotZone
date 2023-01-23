@@ -37,6 +37,7 @@ class AllotZone extends StatelessWidget {
     return MaterialColor(color.value, swatch);
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
