@@ -1,4 +1,5 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/selection_requests.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -41,7 +42,12 @@ class SideBar extends StatelessWidget {
                 Icons.arrow_right_alt,
                 color: Colors.white,
               ),
-              onTap: () {},
+              onTap: () {
+                if(ModalRoute.of(context)!.settings.name=='/selection_requests'){
+                  Navigator.pop(context);
+                }
+                Navigator.of(context).pushReplacementNamed('/selection_requests');
+              },
             )
           ],
         ));
