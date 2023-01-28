@@ -8,4 +8,5 @@ class MyColors{
   static Color linkColor = const Color.fromARGB(255, 54, 216, 244);
   static Color textColor = Colors.white;
   static Color textFieldBorder = Colors.amber;
+  static Color sideBarColor = const Color.fromARGB(255, 48, 48, 48);
 }

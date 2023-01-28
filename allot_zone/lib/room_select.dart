@@ -1,5 +1,6 @@
 import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/Components/room.dart';
+import 'package:allot_zone/Components/side_bar.dart';
 import 'package:allot_zone/login_first_page.dart';
 import 'package:allot_zone/wing_members.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,6 +34,7 @@ class _RoomSelectionState extends State<RoomSelection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const SideBar(),
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
