@@ -129,15 +129,15 @@ class WingMembers extends StatelessWidget {
                     }
                   }
                   final uniqueEmail = emailList.toSet();
-                  if (uniqueEmail.length!=emailList.length){
+                  if (uniqueEmail.length != emailList.length) {
                     showDialog(
-                          context: context,
-                          builder: ((context) => const AlertDialog(
-                                alignment: Alignment.center,
-                                backgroundColor: Colors.grey,
-                                content: Text("Please remove duplicate emails"),
-                              )));
-                      return;
+                        context: context,
+                        builder: ((context) => const AlertDialog(
+                              alignment: Alignment.center,
+                              backgroundColor: Colors.grey,
+                              content: Text("Please remove duplicate emails"),
+                            )));
+                    return;
                   }
                   for (String s in emailList) {
                     if (!EmailValidator.validate(s)) {
@@ -150,9 +150,7 @@ class WingMembers extends StatelessWidget {
                               )));
                       return;
                     }
-                    
                   }
-                  
 
                   if (!emailList.contains(loggedIn.email)) {
                     showDialog(
@@ -201,43 +199,91 @@ class WingMembers extends StatelessWidget {
                                 } on FirebaseAuthException catch (e) {}
                               }
 
-                              int roomChosen = 0;
-                              loading(context);
+                              //Add a loading
                               for (int i = 0; i < emailList.length; i++) {
-                                if (emailList[i] == loggedIn.email) {
-                                  roomChosen = selectedList[(i / 2).floor()];
-                                }
-
                                 final doc = FirebaseFirestore.instance
                                     .collection('users')
                                     .doc(emailList[i]);
-                                try {
-                                  
+                                final doc2 = FirebaseFirestore.instance
+                                    .collection('vishwakarma')
+                                    .doc(selectedList[(i / 2).floor()]
+                                        .toString());
+                                if (emailList[i] != loggedIn.email) {
                                   await doc.set({
                                     'email': emailList[i],
-                                    'roomChosen': selectedList[(i / 2).floor()]
+                                    'requests': {
+                                      loggedIn.email:
+                                          selectedList[(i / 2).floor()]
+                                    }
                                   });
-                                  final wing = FirebaseFirestore.instance
-                                      .collection('vishwakarma')
-                                      .doc(selectedList[(i / 2).floor()]
-                                          .toString());
-                                  await wing.set({'isAvailable': false});
-
-                                } on FirebaseAuthException catch (e) {
-                                  message(context, e.message.toString());
+                                  if (i % 2 == 0) {
+                                    await doc2.update({
+                                      'requests': {
+                                        loggedIn.email: [
+                                          emailList[i],
+                                          emailList[i + 1]
+                                        ]
+                                      }
+                                    });
+                                  }
+                                } else if (emailList[i] == loggedIn.email) {
+                                  final doc = FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(emailList[i]);
+                                  await doc.update({
+                                    'sentRequest': selectedList[(i / 2).floor()]
+                                  });
+                                  if (i % 2 == 0) {
+                                    await doc2.update({
+                                      'requests': {
+                                        loggedIn.email: [
+                                          emailList[i],
+                                          emailList[i + 1]
+                                        ]
+                                      }
+                                    });
+                                  }
                                 }
                               }
-                              
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
-                              Navigator.of(context).pop();
 
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: ((context) =>
-                                          AfterSelection(roomNo: roomChosen))));
+                              //This part is to set selected rooms
+                              // int roomChosen = 0;
+                              // loading(context);
+                              // for (int i = 0; i < emailList.length; i++) {
+                              //   if (emailList[i] == loggedIn.email) {
+                              //     roomChosen = selectedList[(i / 2).floor()];
+                              //   }
+
+                              //   final doc = FirebaseFirestore.instance
+                              //       .collection('users')
+                              //       .doc(emailList[i]);
+                              //   try {
+
+                              //     await doc.set({
+                              //       'email': emailList[i],
+                              //       'roomChosen': selectedList[(i / 2).floor()]
+                              //     });
+                              //     final wing = FirebaseFirestore.instance
+                              //         .collection('vishwakarma')
+                              //         .doc(selectedList[(i / 2).floor()]
+                              //             .toString());
+                              //     await wing.set({'isAvailable': false});
+
+                              //   } on FirebaseAuthException catch (e) {
+                              //     message(context, e.message.toString());
+                              //   }
+                              // }
+
+                              // Navigator.of(context).pop();
+                              // Navigator.of(context).pop();
+                              // Navigator.of(context).pop();
+                              // Navigator.of(context).pop();
+
+                              // Navigator.pushReplacement(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: ((context) =>
+                              //             AfterSelection(roomNo: roomChosen))));
                             },
                             child: Text(
                               'Yes',
