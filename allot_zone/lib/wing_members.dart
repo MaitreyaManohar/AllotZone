@@ -196,7 +196,9 @@ class WingMembers extends StatelessWidget {
                                             )));
                                     return;
                                   }
-                                } on FirebaseAuthException catch (e) {}
+                                } on FirebaseAuthException catch (e) {
+                                  
+                                }
                               }
 
                               //Add a loading

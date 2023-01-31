@@ -1,23 +1,11 @@
+import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/Components/side_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 class SelectionRequest extends StatelessWidget {
   const SelectionRequest({super.key});
-
-  Future<Map<String, int>> getData() async {
-    final collection = FirebaseFirestore.instance.collection('users');
-    final doc = collection.doc(FirebaseAuth.instance.currentUser!.email);
-    final data = await doc.get();
-    if (data.data() == null || data.data()!['requests'] == null) {
-      return {};
-    } else {
-      return data.data()!['requests'];
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +18,51 @@ class SelectionRequest extends StatelessWidget {
           ),
         ),
         body: FutureBuilder(
-          future: getData(),
+          future: FirebaseFirestore.instance
+              .collection('users')
+              .doc(FirebaseAuth.instance.currentUser!.email)
+              .get(),
           builder: ((context, snapshot) {
-            return const Text("Hello");
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  itemCount: snapshot.data!['requests'].length,
+                  itemBuilder: ((context, index) {
+                    String sender =
+                        snapshot.data!['requests'].keys.toList()[index];
+                    int room = snapshot.data!['requests'][sender];
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        minVerticalPadding: 10,
+                        tileColor: MyColors.buttonBackground,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                        title: Text(sender),
+                        subtitle: Text(room.toString()),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            IconButton(
+                                //Yes button
+                                onPressed: () {},
+                                icon: const Icon(
+                                  Icons.check,
+                                )),
+                            IconButton(
+                                onPressed: () {},
+                                icon: const Icon(Icons.close)),
+                          ],
+                        ),
+                      ),
+                    );
+                  }));
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
           }),
         ));
   }
