@@ -7,6 +7,27 @@ import 'package:flutter/material.dart';
 class SelectionRequest extends StatelessWidget {
   const SelectionRequest({super.key});
 
+  void loading(BuildContext context) {
+    //Loading Progress indicator
+    showDialog(
+        context: context,
+        builder: ((context) => const Center(
+              child: CircularProgressIndicator(),
+            )));
+  }
+
+  Future _future() async {
+    final data = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .get();
+    if (data.data()!['requests'] == null) {
+      return null;
+    } else {
+      return data;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,11 +39,11 @@ class SelectionRequest extends StatelessWidget {
           ),
         ),
         body: FutureBuilder(
-          future: FirebaseFirestore.instance
-              .collection('users')
-              .doc(FirebaseAuth.instance.currentUser!.email)
-              .get(),
+          future: _future(),
           builder: ((context, snapshot) {
+            if (snapshot.data == null) {
+              return const Center(child: Text("No requests"));
+            }
             if (snapshot.hasData) {
               return ListView.builder(
                   itemCount: snapshot.data!['requests'].length,
@@ -46,7 +67,43 @@ class SelectionRequest extends StatelessWidget {
                           children: [
                             IconButton(
                                 //Yes button
-                                onPressed: () {},
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: ((context) => AlertDialog(
+                                            backgroundColor: Colors.grey,
+                                            content: const Text(
+                                                "Confirm that you accept this request"),
+                                            actions: [
+                                              TextButton(
+                                                style: TextButton.styleFrom(
+                                                    backgroundColor: MyColors
+                                                        .buttonBackground),
+                                                onPressed: () {},
+                                                child: Text(
+                                                  'Yes',
+                                                  style: TextStyle(
+                                                      color: MyColors
+                                                          .buttonTextColor),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                style: TextButton.styleFrom(
+                                                    backgroundColor: MyColors
+                                                        .buttonBackground),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text(
+                                                  'No',
+                                                  style: TextStyle(
+                                                      color: MyColors
+                                                          .buttonTextColor),
+                                                ),
+                                              ),
+                                            ],
+                                          )));
+                                },
                                 icon: const Icon(
                                   Icons.check,
                                 )),
