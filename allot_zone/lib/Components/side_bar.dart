@@ -1,4 +1,5 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/selection_requests.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,25 +29,21 @@ class SideBar extends StatelessWidget {
             )));
   }
 
-  Future<bool> checkSentRequest(BuildContext context) async {
+  Future<int> _checkChosenRoom() async {
     try {
       final doc = FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.email);
 
       final data = await doc.get();
-
-      if (data.data() != null) {
-        if (data.data()!['sentRequest'] == null) {
-          return true;
-        } else {
-          return false;
-        }
+      if (!data.exists) {
+        return 0;
+      } else if (data.data()!['roomChosen'] != null) {
+        return data.data()!['roomChosen'];
       }
-      return false;
-    } on Exception catch (e) {
-      message(context, e.toString());
-      return false;
+      return 0;
+    } on Exception catch (_) {
+      return -1;
     }
   }
 
@@ -70,22 +67,42 @@ class SideBar extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting ||
                     snapshot.hasError) {
-                  return SizedBox.shrink();
+                  return const SizedBox.shrink();
                 }
                 if (snapshot.hasData && !snapshot.data!.exists) {
-                  return const Text("Document does not exist");
+                  return ListTile(
+                    title: const Text("Room selection"),
+                    leading: const Icon(
+                      Icons.swap_calls,
+                      color: Colors.white,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: ((context) => const RoomSelection())));
+                    },
+                  );
                 }
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.data!.data()!['sentRequest'] == null) {
                     return ListTile(
-                      title: const Text("Room Selection"),
+                      title: Text((snapshot.data!.data()!['roomChosen'] == null)
+                          ? "Room Selection"
+                          : "Room selected"),
                       leading: const Icon(
                         Icons.door_front_door,
                         color: Colors.white,
                       ),
                       onTap: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: ((context) => const RoomSelection())));
+                        (snapshot.data!.data()!['roomChosen'] == null)
+                            ? Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: ((context) =>
+                                        const RoomSelection())))
+                            : Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: ((context) => AfterSelection(
+                                        roomNo: snapshot.data!
+                                            .data()!['roomChosen']))));
                       },
                     );
                   } else {
@@ -95,29 +112,45 @@ class SideBar extends StatelessWidget {
                 return const Text("loading");
               },
             ),
-            ListTile(
-              title: const Text("Swap Requests"),
-              leading: const Icon(
-                Icons.swap_calls,
-                color: Colors.white,
-              ),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text("Room Selection Requests"),
-              leading: const Icon(
-                Icons.arrow_right_alt,
-                color: Colors.white,
-              ),
-              onTap: () {
-                if (ModalRoute.of(context)!.settings.name ==
-                    '/selection_requests') {
-                  Navigator.pop(context);
-                }
-                Navigator.of(context)
-                    .pushReplacementNamed('/selection_requests');
-              },
-            )
+            FutureBuilder(
+                future: _checkChosenRoom(),
+                builder: ((context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting ||
+                      snapshot.hasError) {
+                    return const SizedBox.shrink();
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.done ||
+                      !snapshot.hasData) {
+                    if ((snapshot.data!) != 0) {
+                      return ListTile(
+                        title: const Text("Swap Requests"),
+                        leading: const Icon(
+                          Icons.swap_calls,
+                          color: Colors.white,
+                        ),
+                        onTap: () {},
+                      );
+                    }
+                    return ListTile(
+                      title: const Text("Room Selection Requests"),
+                      leading: const Icon(
+                        Icons.arrow_right_alt,
+                        color: Colors.white,
+                      ),
+                      onTap: () {
+                        if (ModalRoute.of(context)!.settings.name ==
+                            '/selection_requests') {
+                          Navigator.pop(context);
+                        }
+                        Navigator.of(context)
+                            .pushReplacementNamed('/selection_requests');
+                      },
+                    );
+                  }
+
+                  return const Text("Loading...");
+                })),
           ],
         ));
   }

@@ -1,3 +1,4 @@
+import 'package:allot_zone/Components/side_bar.dart';
 import 'package:allot_zone/login_first_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -11,6 +12,7 @@ class AfterSelection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const SideBar(),
       appBar: AppBar(
         centerTitle: true,
         title: const Text(

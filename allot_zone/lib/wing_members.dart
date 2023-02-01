@@ -103,10 +103,7 @@ class WingMembers extends StatelessWidget {
               child: TextButton(
                 //Confirm emails button
                 onPressed: () async {
-                  emailList = [
-                    'maitreya2003@gmail.com',
-                    'maitreyaspotify@gmail.com'
-                  ];
+                  print(emailList);
                   User? loggedIn = FirebaseAuth.instance.currentUser;
                   if (loggedIn == null) {
                     Navigator.pushReplacement(context,
@@ -176,7 +173,6 @@ class WingMembers extends StatelessWidget {
                             )));
                     return;
                   }
-                  print("Checked email has to be included");
 
                   //Dialog to show confirmation message on emails
                   showDialog(
