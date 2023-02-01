@@ -68,7 +68,7 @@ class SideBar extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting ||
                     snapshot.hasError) {
-                  return const SizedBox.shrink();
+                  return const Text("Loading");
                 }
                 if (snapshot.hasData && !snapshot.data!.exists) {
                   return ListTile(
@@ -83,8 +83,8 @@ class SideBar extends StatelessWidget {
                     },
                   );
                 }
-                if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.data!.data()!['sentRequest'] == null || snapshot.data!.data()!['roomChosen']!=null) {
+                if (snapshot.connectionState == ConnectionState.done && snapshot.data!.data()!=null) {
+                  if (snapshot.data!.data()!['sentRequest'] == null || snapshot.data!.data()!['roomChosen']==null) {
                     return ListTile(
                       title: Text((snapshot.data!.data()!['roomChosen'] == null)
                           ? "Room Selection"
@@ -107,7 +107,7 @@ class SideBar extends StatelessWidget {
                       },
                     );
                   } else {
-                    return const SizedBox.shrink();
+                    return const Text("loading");
                   }
                 }
                 return const Text("loading");
@@ -118,7 +118,7 @@ class SideBar extends StatelessWidget {
                 builder: ((context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting ||
                       snapshot.hasError) {
-                    return const SizedBox.shrink();
+                    return const Text("loading");
                   }
 
                   if (snapshot.connectionState == ConnectionState.done ||
