@@ -98,13 +98,24 @@ class SelectionRequest extends StatelessWidget {
                           children: [
                             IconButton(
                                 //Yes button
-                                onPressed: () {
+                                onPressed: () async {
+                                  final doc2 = FirebaseFirestore.instance
+                                      .collection('vishwakarma')
+                                      .doc(room.toString());
+                                  loading(context);
+                                  final data = await doc2.get();
+                                  Navigator.pop(context);
+                                  final List recipients =
+                                      data.data()!['requests'][sender];
+                                  recipients.remove(
+                                      FirebaseAuth.instance.currentUser!.email);
+                                  final String roommate = recipients[0];
                                   showDialog(
                                       context: context,
                                       builder: ((context) => AlertDialog(
                                             backgroundColor: Colors.grey,
-                                            content: const Text(
-                                                "Confirm that you accept this request"),
+                                            content: Text(
+                                                "Your roommate is $roommate .\nConfirm that you accept this request"),
                                             actions: [
                                               TextButton(
                                                 style: TextButton.styleFrom(
@@ -115,26 +126,16 @@ class SelectionRequest extends StatelessWidget {
                                                       .instance
                                                       .collection('vishwakarma')
                                                       .doc(room.toString());
-                                                  loading(context);
-                                                  final data = await doc2.get();
-                                                  Navigator.pop(context);
+
                                                   if (data.data()![
                                                           'isAvailable'] ==
                                                       false) {
                                                     message(context,
                                                         "Room $room has already been occupied");
+
                                                     return;
                                                   }
 
-                                                  final List recipients =
-                                                      data.data()!['requests']
-                                                          [sender];
-                                                  recipients.remove(FirebaseAuth
-                                                      .instance
-                                                      .currentUser!
-                                                      .email);
-                                                  final String roommate =
-                                                      recipients[0];
                                                   final roomMateData =
                                                       await FirebaseFirestore
                                                           .instance
@@ -167,6 +168,13 @@ class SelectionRequest extends StatelessWidget {
                                                                   .instance
                                                                   .currentUser!
                                                                   .email);
+                                                      final userDataRead =
+                                                          await docData.get();
+                                                      Map userRequests =
+                                                          userDataRead.data()![
+                                                              'requests'];
+                                                      userRequests
+                                                          .remove(sender);
                                                       final roomMatesData =
                                                           FirebaseFirestore
                                                               .instance
@@ -178,19 +186,27 @@ class SelectionRequest extends StatelessWidget {
                                                           SetOptions(
                                                               merge: true));
                                                       await docData.set(
-                                                          {'roomChosen': room},
+                                                          {
+                                                            'roomChosen': room,
+                                                            'requests':
+                                                                userRequests
+                                                          },
                                                           SetOptions(
                                                               merge: true));
-                                                      await doc2.set({
-                                                        'isAvailable': false,
-                                                        'residents': [
-                                                          roommate,
-                                                          FirebaseAuth
-                                                              .instance
-                                                              .currentUser!
-                                                              .email
-                                                        ]
-                                                      },SetOptions(merge: true));
+                                                      await doc2.set(
+                                                          {
+                                                            'isAvailable':
+                                                                false,
+                                                            'residents': [
+                                                              roommate,
+                                                              FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser!
+                                                                  .email
+                                                            ]
+                                                          },
+                                                          SetOptions(
+                                                              merge: true));
                                                       Navigator.of(context)
                                                           .pop();
                                                       Navigator.of(context).pushReplacement(
@@ -220,16 +236,33 @@ class SelectionRequest extends StatelessWidget {
                                                                 .instance
                                                                 .currentUser!
                                                                 .email);
+                                                    final userDataRead =
+                                                        await docData.get();
+                                                    Map userRequests =
+                                                        userDataRead.data()![
+                                                            'requests'];
+                                                    userRequests.remove(sender);
                                                     final roomMatesData =
                                                         FirebaseFirestore
                                                             .instance
                                                             .collection('users')
                                                             .doc(roommate);
+                                                    final roommateDataRead =
+                                                        await roomMatesData
+                                                            .get();
+                                                    Map roomMateRequests =
+                                                        roommateDataRead
+                                                                .data()![
+                                                            'requests'];
+                                                    userRequests.remove(sender);
                                                     await roomMatesData.set({
-                                                      'roomChosen': room
+                                                      'roomChosen': room,
+                                                      'requests':
+                                                          roomMateRequests
                                                     }, SetOptions(merge: true));
                                                     await docData.set({
-                                                      'roomChosen': room
+                                                      'roomChosen': room,
+                                                      'requests': userRequests
                                                     }, SetOptions(merge: true));
                                                     await doc2.set({
                                                       'isAvailable': false,
@@ -239,7 +272,6 @@ class SelectionRequest extends StatelessWidget {
                                                             .currentUser!.email
                                                       ]
                                                     });
-                                                    
                                                   }
                                                   Navigator.of(context).pushReplacement(
                                                       MaterialPageRoute(
@@ -276,7 +308,121 @@ class SelectionRequest extends StatelessWidget {
                                   Icons.check,
                                 )),
                             IconButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      backgroundColor: Colors.grey,
+                                      content: const Text(
+                                          "Are you sure you want to reject the request?"),
+                                      actions: [
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                              backgroundColor:
+                                                  MyColors.buttonBackground),
+                                          onPressed: () async {
+                                            final doc2 = FirebaseFirestore
+                                                .instance
+                                                .collection('vishwakarma')
+                                                .doc(room.toString());
+                                            loading(context);
+                                            final data = await doc2.get();
+                                            Navigator.pop(context);
+                                            final List recipients = data
+                                                .data()!['requests'][sender];
+                                            recipients.remove(FirebaseAuth
+                                                .instance.currentUser!.email);
+                                            final String roommate =
+                                                recipients[0];
+                                            if (roommate != sender) {
+                                              loading(context);
+                                              final roomMateDoc =
+                                                  FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(roommate);
+                                              final roomMateDocdata =
+                                                  await roomMateDoc.get();
+                                              Map tobeChangedforRoommate =
+                                                  roomMateDocdata
+                                                      .data()!['requests'];
+                                              tobeChangedforRoommate
+                                                  .remove(sender);
+                                              await roomMateDoc.set(
+                                                {
+                                                  'requests':
+                                                      tobeChangedforRoommate
+                                                },
+                                                SetOptions(merge: true),
+                                              );
+                                              final userDoc = FirebaseFirestore
+                                                  .instance
+                                                  .collection('users')
+                                                  .doc(FirebaseAuth.instance
+                                                      .currentUser!.email);
+                                              final userDocData =
+                                                  await userDoc.get();
+                                              Map tobeChangedforUser =
+                                                  userDocData
+                                                      .data()!['requests'];
+                                              tobeChangedforUser.remove(sender);
+                                              await userDoc.set({
+                                                'requests': tobeChangedforUser
+                                              }, SetOptions(merge: true));
+                                              Navigator.pop(context);
+                                              Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: ((context) =>
+                                                          SelectionRequest())));
+                                            } else {
+                                              loading(context);
+                                              final userDoc = FirebaseFirestore
+                                                  .instance
+                                                  .collection('users')
+                                                  .doc(FirebaseAuth.instance
+                                                      .currentUser!.email);
+                                              final userDocData =
+                                                  await userDoc.get();
+                                              Map tobeChangedforUser =
+                                                  userDocData
+                                                      .data()!['requests'];
+                                              tobeChangedforUser.remove(sender);
+                                              await userDoc.set({
+                                                'requests': tobeChangedforUser
+                                              }, SetOptions(merge: true));
+                                              Navigator.pop(context);
+                                              Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: ((context) =>
+                                                          SelectionRequest())));
+                                            }
+                                          },
+                                          child: Text(
+                                            'Yes',
+                                            style: TextStyle(
+                                                color:
+                                                    MyColors.buttonTextColor),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                              backgroundColor:
+                                                  MyColors.buttonBackground),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text(
+                                            'No',
+                                            style: TextStyle(
+                                                color:
+                                                    MyColors.buttonTextColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                                 icon: const Icon(Icons.close)),
                           ],
                         ),
