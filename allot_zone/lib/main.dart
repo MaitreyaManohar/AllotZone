@@ -43,7 +43,8 @@ class AllotZone extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       routes: {
-        '/selection_requests':(context) => const SelectionRequest()
+        '/selection_requests':(context) => const SelectionRequest(),
+        
       },
       debugShowCheckedModeBanner: false,
         theme: ThemeData(
