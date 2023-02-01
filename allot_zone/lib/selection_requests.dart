@@ -190,7 +190,7 @@ class SelectionRequest extends StatelessWidget {
                                                               .currentUser!
                                                               .email
                                                         ]
-                                                      });
+                                                      },SetOptions(merge: true));
                                                       Navigator.of(context)
                                                           .pop();
                                                       Navigator.of(context).pushReplacement(
