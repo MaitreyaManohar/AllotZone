@@ -147,16 +147,14 @@ class SelectionRequest extends StatelessWidget {
                                                         "Your room mate $roommate has already chosen a room");
                                                     return;
                                                   }
-                                                  if(roommate==sender){
-
-                                                  }
+                                                  if (roommate == sender) {}
                                                   if (roomMateData.data()![
                                                           'accepted'] ==
                                                       null) {
                                                     message(context,
                                                         "Your room mate $roommate has not accepted the request yet\n. You will be assigned this room only once he accepts it");
                                                   }
-                                                  
+
                                                   if (roomMateData
                                                       .data()!['accepted']
                                                       .contains(sender)) {

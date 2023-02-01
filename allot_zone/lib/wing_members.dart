@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/login_first_page.dart';
 import 'package:allot_zone/room_select.dart';
+import 'package:allot_zone/selection_requests.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -211,18 +212,18 @@ class WingMembers extends StatelessWidget {
                                 }
                                 Map toBeAdded = {};
 
-                                for (int i = 0; i < emailList.length; i++) {
-                                  toBeAdded[selectedList[(i / 2).floor()]] = [
+                                for (int i = 0; i < selectedList.length; i++) {
+                                  toBeAdded[selectedList[i].toString()] = [
                                     emailList[2 * i],
                                     emailList[2 * i + 1]
                                   ];
                                 }
+
                                 //Add a loading
                                 for (int i = 0; i < emailList.length; i++) {
                                   final doc = FirebaseFirestore.instance
                                       .collection('users')
                                       .doc(emailList[i]);
-                                  print("Error here");
                                   final doc2 = FirebaseFirestore.instance
                                       .collection('vishwakarma')
                                       .doc(selectedList[(i / 2).floor()]
@@ -246,11 +247,11 @@ class WingMembers extends StatelessWidget {
                                       }, SetOptions(merge: true));
                                     }
                                   } else if (emailList[i] == loggedIn.email) {
-                                    final doc = FirebaseFirestore.instance
+                                    final doc3 = FirebaseFirestore.instance
                                         .collection('users')
-                                        .doc(emailList[i]);
+                                        .doc(loggedIn.email);
 
-                                    await doc.set({'sentRequest': toBeAdded},
+                                    await doc3.set({'sentRequest': toBeAdded},
                                         SetOptions(merge: true));
                                     if (i % 2 == 0) {
                                       await doc2.set({
@@ -264,6 +265,10 @@ class WingMembers extends StatelessWidget {
                                     }
                                   }
                                 }
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: ((context) =>
+                                            const SelectionRequest())));
                               } on Exception catch (e) {
                                 message(context, e.toString());
                               }
