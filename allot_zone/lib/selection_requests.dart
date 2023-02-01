@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'login_first_page.dart';
+
 class SelectionRequest extends StatelessWidget {
   const SelectionRequest({super.key});
 
@@ -13,6 +15,15 @@ class SelectionRequest extends StatelessWidget {
         context: context,
         builder: ((context) => const Center(
               child: CircularProgressIndicator(),
+            )));
+  }
+
+  void message(BuildContext context, String message) {
+    showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+              content: Text(message),
+              backgroundColor: Colors.grey,
             )));
   }
 
@@ -37,11 +48,30 @@ class SelectionRequest extends StatelessWidget {
           title: const Text(
             'AllotZone',
           ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(backgroundColor: Colors.transparent),
+              onPressed: () async {
+                loading(context);
+                await FirebaseAuth.instance.signOut();
+                Navigator.pop(context);
+
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: ((context) => FirstPage())));
+              },
+              child: Text(
+                'SignOut',
+                style: TextStyle(color: MyColors.buttonTextColor),
+              ),
+            )
+          ],
         ),
         body: FutureBuilder(
           future: _future(),
           builder: ((context, snapshot) {
             if (snapshot.data == null) {
+              return const Center(child: Text("No requests"));
+            } else if (snapshot.data!['requests'].isEmpty) {
               return const Center(child: Text("No requests"));
             }
             if (snapshot.hasData) {
@@ -79,7 +109,69 @@ class SelectionRequest extends StatelessWidget {
                                                 style: TextButton.styleFrom(
                                                     backgroundColor: MyColors
                                                         .buttonBackground),
-                                                onPressed: () {},
+                                                onPressed: () async {
+                                                  final doc2 = FirebaseFirestore
+                                                      .instance
+                                                      .collection('vishwakarma')
+                                                      .doc(room.toString());
+                                                  loading(context);
+                                                  final data = await doc2.get();
+                                                  Navigator.pop(context);
+                                                  if (data.data()![
+                                                          'isAvailable'] ==
+                                                      false) {
+                                                    message(context,
+                                                        "Room $room has already been occupied");
+                                                    return;
+                                                  }
+
+                                                  final List recipients =
+                                                      data.data()!['requests']
+                                                          [sender];
+                                                  recipients.remove(FirebaseAuth
+                                                      .instance
+                                                      .currentUser!
+                                                      .email);
+                                                  final String roommate =
+                                                      recipients[0];
+                                                  final roomMateData =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection('users')
+                                                          .doc(roommate)
+                                                          .get();
+                                                  if (roomMateData.data()![
+                                                          'roomChosen'] !=
+                                                      null) {
+                                                    message(context,
+                                                        "Your room mate $roommate has already chosen a room");
+                                                    return;
+                                                  }
+                                                  if (roomMateData.data()![
+                                                          'accepted'] ==
+                                                      null) {
+                                                    message(context,
+                                                        "Your room mate $roommate has not accepted the request yet\n. You will be assigned this room only once he accepts it");
+                                                  }
+
+                                                  if (roomMateData
+                                                      .data()!['accepted']
+                                                      .contains(sender)) {
+                                                    final docData =
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection('users')
+                                                            .doc(FirebaseAuth
+                                                                .instance
+                                                                .currentUser!
+                                                                .email);
+                                                    await docData.set({
+                                                      'roomChosen': room
+                                                    }, SetOptions(merge: true));
+                                                    await doc2.set(
+                                                        {'isAvailable': false});
+                                                  }
+                                                },
                                                 child: Text(
                                                   'Yes',
                                                   style: TextStyle(

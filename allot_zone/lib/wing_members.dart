@@ -102,32 +102,40 @@ class WingMembers extends StatelessWidget {
               child: TextButton(
                 //Confirm emails button
                 onPressed: () async {
+                  emailList = [
+                    'maitreya2003@gmail.com',
+                    'maitreyaspotify@gmail.com'
+                  ];
                   User? loggedIn = FirebaseAuth.instance.currentUser;
                   if (loggedIn == null) {
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: ((context) => FirstPage())));
                     return;
                   }
-
-                  for (int i in selectedList) {
-                    final collection =
-                        FirebaseFirestore.instance.collection('vishwakarma');
-                    final doc = collection.doc(i.toString());
-                    final data = await doc.get();
-                    if (!data.data()!['isAvailable']) {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: ((context) => const RoomSelection())));
-                      showDialog(
-                          context: context,
-                          builder: ((context) => AlertDialog(
-                                backgroundColor: Colors.grey,
-                                content: Text(
-                                    "Someone has already chosen room VK$i"),
-                              )));
-                      return;
+                  try {
+                    for (int i in selectedList) {
+                      final collection =
+                          FirebaseFirestore.instance.collection('vishwakarma');
+                      final doc = collection.doc(i.toString());
+                      final data = await doc.get();
+                      if (!data.data()!['isAvailable']) {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: ((context) => const RoomSelection())));
+                        showDialog(
+                            context: context,
+                            builder: ((context) => AlertDialog(
+                                  backgroundColor: Colors.grey,
+                                  content: Text(
+                                      "Someone has already chosen room VK$i"),
+                                )));
+                        return;
+                      }
                     }
+                  } on Exception catch (e) {
+                    message(context, e.toString());
                   }
+                  print("Checked chosen room");
                   final uniqueEmail = emailList.toSet();
                   if (uniqueEmail.length != emailList.length) {
                     showDialog(
@@ -139,6 +147,8 @@ class WingMembers extends StatelessWidget {
                             )));
                     return;
                   }
+                  print("Checked duplicate emails ");
+
                   for (String s in emailList) {
                     if (!EmailValidator.validate(s)) {
                       showDialog(
@@ -152,6 +162,8 @@ class WingMembers extends StatelessWidget {
                     }
                   }
 
+                  print("Checked validity of emails");
+
                   if (!emailList.contains(loggedIn.email)) {
                     showDialog(
                         context: context,
@@ -163,6 +175,7 @@ class WingMembers extends StatelessWidget {
                             )));
                     return;
                   }
+                  print("Checked email has to be included");
 
                   //Dialog to show confirmation message on emails
                   showDialog(
@@ -177,9 +190,8 @@ class WingMembers extends StatelessWidget {
                             style: TextButton.styleFrom(
                                 backgroundColor: MyColors.buttonBackground),
                             onPressed: () async {
-                              loading(context);
-                              for (String s in emailList) {
-                                try {
+                              try {
+                                for (String s in emailList) {
                                   final doc = FirebaseFirestore.instance
                                       .collection('users')
                                       .doc(s);
@@ -192,60 +204,63 @@ class WingMembers extends StatelessWidget {
                                               alignment: Alignment.center,
                                               backgroundColor: Colors.grey,
                                               content: Text(
-                                                  "Student with ${s} has already chosen a room"),
+                                                  "Student with $s has already chosen a room"),
                                             )));
                                     return;
                                   }
-                                } on FirebaseAuthException catch (e) {
-                                  
                                 }
-                              }
 
-                              //Add a loading
-                              for (int i = 0; i < emailList.length; i++) {
-                                final doc = FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(emailList[i]);
-                                final doc2 = FirebaseFirestore.instance
-                                    .collection('vishwakarma')
-                                    .doc(selectedList[(i / 2).floor()]
-                                        .toString());
-                                if (emailList[i] != loggedIn.email) {
-                                  await doc.set({
-                                    'email': emailList[i],
-                                    'requests': {
-                                      loggedIn.email:
-                                          selectedList[(i / 2).floor()]
-                                    }
-                                  });
-                                  if (i % 2 == 0) {
-                                    await doc2.update({
-                                      'requests': {
-                                        loggedIn.email: [
-                                          emailList[i],
-                                          emailList[i + 1]
-                                        ]
-                                      }
-                                    });
-                                  }
-                                } else if (emailList[i] == loggedIn.email) {
+                                //Add a loading
+                                for (int i = 0; i < emailList.length; i++) {
                                   final doc = FirebaseFirestore.instance
                                       .collection('users')
                                       .doc(emailList[i]);
-                                  await doc.update({
-                                    'sentRequest': selectedList[(i / 2).floor()]
-                                  });
-                                  if (i % 2 == 0) {
-                                    await doc2.update({
+                                  print("Error here");
+                                  final doc2 = FirebaseFirestore.instance
+                                      .collection('vishwakarma')
+                                      .doc(selectedList[(i / 2).floor()]
+                                          .toString());
+                                  if (emailList[i] != loggedIn.email) {
+                                    await doc.set({
+                                      'email': emailList[i],
                                       'requests': {
-                                        loggedIn.email: [
-                                          emailList[i],
-                                          emailList[i + 1]
-                                        ]
+                                        loggedIn.email:
+                                            selectedList[(i / 2).floor()]
                                       }
-                                    });
+                                    },SetOptions(merge: true));
+                                    if (i % 2 == 0) {
+                                      await doc2.set({
+                                        'requests': {
+                                          loggedIn.email: [
+                                            emailList[i],
+                                            emailList[i + 1]
+                                          ]
+                                        }
+                                      },SetOptions(merge: true));
+                                    }
+                                  } else if (emailList[i] == loggedIn.email) {
+                                    final doc = FirebaseFirestore.instance
+                                        .collection('users')
+                                        .doc(emailList[i]);
+                                    await doc.set({
+                                      'sentRequest':
+                                          selectedList[(i / 2).floor()]
+                                    },SetOptions(merge: true));
+                                    if (i % 2 == 0) {
+                                      await doc2.set({
+                                        'requests': {
+                                          loggedIn.email: [
+                                            emailList[i],
+                                            emailList[i + 1]
+                                          ]
+                                        }
+                                      },SetOptions(merge: true));
+                                    }
                                   }
                                 }
+                                
+                              } on Exception catch (e) {
+                                message(context, e.toString());
                               }
 
                               //This part is to set selected rooms
