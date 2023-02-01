@@ -41,21 +41,7 @@ class FirstPage extends StatelessWidget {
         title: const Text(
           'AllotZone',
         ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent),
-            onPressed: ()async {
-              loading(context);
-              await FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
-            },
-            child: Text(
-              'SignOut',
-              style: TextStyle(color: MyColors.buttonTextColor),
-            ),
-          )
-        ],
+        
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
