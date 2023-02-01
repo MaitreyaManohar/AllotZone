@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'after_selection.dart';
 import 'login_first_page.dart';
 
 class SelectionRequest extends StatelessWidget {
@@ -147,7 +148,60 @@ class SelectionRequest extends StatelessWidget {
                                                         "Your room mate $roommate has already chosen a room");
                                                     return;
                                                   }
-                                                  if (roommate == sender) {}
+                                                  if (roommate == sender) {
+                                                    final senderDoc =
+                                                        await FirebaseFirestore
+                                                            .instance
+                                                            .collection('users')
+                                                            .doc(sender)
+                                                            .get();
+                                                    if (senderDoc.data()![
+                                                            'roomChosen'] ==
+                                                        null) {
+                                                      final docData =
+                                                          FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  'users')
+                                                              .doc(FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser!
+                                                                  .email);
+                                                      final roomMatesData =
+                                                          FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  'users')
+                                                              .doc(roommate);
+                                                      await roomMatesData.set(
+                                                          {'roomChosen': room},
+                                                          SetOptions(
+                                                              merge: true));
+                                                      await docData.set(
+                                                          {'roomChosen': room},
+                                                          SetOptions(
+                                                              merge: true));
+                                                      await doc2.set({
+                                                        'isAvailable': false,
+                                                        'residents': [
+                                                          roommate,
+                                                          FirebaseAuth
+                                                              .instance
+                                                              .currentUser!
+                                                              .email
+                                                        ]
+                                                      });
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                      Navigator.of(context).pushReplacement(
+                                                          MaterialPageRoute(
+                                                              builder: ((context) =>
+                                                                  AfterSelection(
+                                                                      roomNo:
+                                                                          room))));
+                                                      return;
+                                                    }
+                                                  }
                                                   if (roomMateData.data()![
                                                           'accepted'] ==
                                                       null) {
@@ -166,12 +220,32 @@ class SelectionRequest extends StatelessWidget {
                                                                 .instance
                                                                 .currentUser!
                                                                 .email);
+                                                    final roomMatesData =
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection('users')
+                                                            .doc(roommate);
+                                                    await roomMatesData.set({
+                                                      'roomChosen': room
+                                                    }, SetOptions(merge: true));
                                                     await docData.set({
                                                       'roomChosen': room
                                                     }, SetOptions(merge: true));
-                                                    await doc2.set(
-                                                        {'isAvailable': false});
+                                                    await doc2.set({
+                                                      'isAvailable': false,
+                                                      'residents': [
+                                                        roommate,
+                                                        FirebaseAuth.instance
+                                                            .currentUser!.email
+                                                      ]
+                                                    });
                                                   }
+                                                  Navigator.of(context).pushReplacement(
+                                                      MaterialPageRoute(
+                                                          builder: ((context) =>
+                                                              AfterSelection(
+                                                                  roomNo:
+                                                                      room))));
                                                 },
                                                 child: Text(
                                                   'Yes',
