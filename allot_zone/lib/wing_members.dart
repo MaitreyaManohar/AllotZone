@@ -209,7 +209,14 @@ class WingMembers extends StatelessWidget {
                                     return;
                                   }
                                 }
+                                Map toBeAdded = {};
 
+                                for (int i = 0; i < emailList.length; i++) {
+                                  toBeAdded[selectedList[(i / 2).floor()]] = [
+                                    emailList[2 * i],
+                                    emailList[2 * i + 1]
+                                  ];
+                                }
                                 //Add a loading
                                 for (int i = 0; i < emailList.length; i++) {
                                   final doc = FirebaseFirestore.instance
@@ -227,7 +234,7 @@ class WingMembers extends StatelessWidget {
                                         loggedIn.email:
                                             selectedList[(i / 2).floor()]
                                       }
-                                    },SetOptions(merge: true));
+                                    }, SetOptions(merge: true));
                                     if (i % 2 == 0) {
                                       await doc2.set({
                                         'requests': {
@@ -236,16 +243,15 @@ class WingMembers extends StatelessWidget {
                                             emailList[i + 1]
                                           ]
                                         }
-                                      },SetOptions(merge: true));
+                                      }, SetOptions(merge: true));
                                     }
                                   } else if (emailList[i] == loggedIn.email) {
                                     final doc = FirebaseFirestore.instance
                                         .collection('users')
                                         .doc(emailList[i]);
-                                    await doc.set({
-                                      'sentRequest':
-                                          selectedList[(i / 2).floor()]
-                                    },SetOptions(merge: true));
+
+                                    await doc.set({'sentRequest': toBeAdded},
+                                        SetOptions(merge: true));
                                     if (i % 2 == 0) {
                                       await doc2.set({
                                         'requests': {
@@ -254,11 +260,10 @@ class WingMembers extends StatelessWidget {
                                             emailList[i + 1]
                                           ]
                                         }
-                                      },SetOptions(merge: true));
+                                      }, SetOptions(merge: true));
                                     }
                                   }
                                 }
-                                
                               } on Exception catch (e) {
                                 message(context, e.toString());
                               }
