@@ -1,4 +1,6 @@
 import 'package:allot_zone/Colors.dart';
+import 'package:allot_zone/Components/new_swap.dart';
+import 'package:allot_zone/Components/pending_swaps.dart';
 import 'package:allot_zone/Components/side_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,9 +32,18 @@ class SwapRequest extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return DefaultTabController(
+
+      length: 2,
+      child: Scaffold(
         drawer: const SideBar(),
         appBar: AppBar(
+          bottom: const TabBar(  
+        tabs: [  
+          Tab(text: "New",)  ,
+          Tab(text: "Pending",)
+        ],  
+      ),  
           centerTitle: true,
           title: const Text(
             'AllotZone',
@@ -44,7 +55,7 @@ class SwapRequest extends StatelessWidget {
                 loading(context);
                 await FirebaseAuth.instance.signOut();
                 Navigator.pop(context);
-
+    
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: ((context) => FirstPage())));
               },
@@ -54,6 +65,11 @@ class SwapRequest extends StatelessWidget {
               ),
             )
           ],
-        ));
+
+        
+        ),
+        body: TabBarView(children: [NewSwap(),PendinSwaps()]),
+      ),
+    );
   }
 }
