@@ -2,6 +2,7 @@ import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/selection_requests.dart';
+import 'package:allot_zone/swap_request.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,7 @@ class SideBar extends StatelessWidget {
                   );
                 }
                 if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.data!.data()!['sentRequest'] == null) {
+                  if (snapshot.data!.data()!['sentRequest'] == null || snapshot.data!.data()!['roomChosen']!=null) {
                     return ListTile(
                       title: Text((snapshot.data!.data()!['roomChosen'] == null)
                           ? "Room Selection"
@@ -129,7 +130,13 @@ class SideBar extends StatelessWidget {
                           Icons.swap_calls,
                           color: Colors.white,
                         ),
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SwapRequest(),
+                              ));
+                        },
                       );
                     }
                     return ListTile(
