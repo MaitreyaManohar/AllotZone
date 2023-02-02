@@ -112,23 +112,19 @@ class _NewSwapState extends State<NewSwap> {
                     .collection('users')
                     .doc(residents[1]);
 
-                await requestSwapDoc1.set(
-                  {
-                    'swaprequests': {
-                      '$room_no': residents,
-                    }
-                  },
-                  SetOptions(merge: true)
-                );
-                await requestSwapDoc2.set(
-                  {
-                    'swaprequests': {
-                      '$room_no': residents,
-                    }
-                  },
-                  SetOptions(merge: true)
-                ); 
+                await requestSwapDoc1.set({
+                  'swaprequests': {
+                    '$room_no': residents,
+                  }
+                }, SetOptions(merge: true));
+                await requestSwapDoc2.set({
+                  'swaprequests': {
+                    '$room_no': residents,
+                  }
+                }, SetOptions(merge: true));
               }
+              message(
+                  context, "A request has been sent to the residents in 163");
             }
           },
           child: Text(
