@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
@@ -101,9 +102,24 @@ class _NewSwapState extends State<NewSwap> {
               loading(context);
               final roomToSwapData = await roomToSwapDoc.get();
               Navigator.of(context).pop();
+
+              final userDoc = FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.email);
+              loading(context);
+              final userDocData =await userDoc.get();
+              Navigator.pop(context);
+
+              if(userDocData.data()!['roomChosen']==room_no){
+                message(context, "Please choose a room other than your room");
+                return;
+              }
+
               if (roomToSwapData.data()!['isAvailable']) {
                 message(context, "Room $room_no has not been occupied");
-              } else {
+              } 
+              
+              else {
                 final List residents = roomToSwapData.data()!['residents'];
                 final requestSwapDoc1 = FirebaseFirestore.instance
                     .collection('users')
@@ -111,20 +127,25 @@ class _NewSwapState extends State<NewSwap> {
                 final requestSwapDoc2 = FirebaseFirestore.instance
                     .collection('users')
                     .doc(residents[1]);
-
+                final swaprequests1data = await requestSwapDoc1.get();
+                List swaprequests1list =
+                    (swaprequests1data.data()!['swaprequests'] == null)
+                        ? []
+                        : swaprequests1data.data()!['swaprequests'];
+                if(swaprequests1list.contains(FirebaseAuth.instance.currentUser!.email)){
+                  message(context, "You have already sent a request");
+                  return;
+                }
+                swaprequests1list.add(FirebaseAuth.instance.currentUser!.email);
                 await requestSwapDoc1.set({
-                  'swaprequests': {
-                    '$room_no': residents,
-                  }
+                  'swaprequests': swaprequests1list
                 }, SetOptions(merge: true));
                 await requestSwapDoc2.set({
-                  'swaprequests': {
-                    '$room_no': residents,
-                  }
+                  'swaprequests': swaprequests1list
                 }, SetOptions(merge: true));
               }
-              message(
-                  context, "A request has been sent to the residents in 163");
+              message(context,
+                  "A request has been sent to the residents in $room_no");
             }
           },
           child: Text(

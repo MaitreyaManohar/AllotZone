@@ -220,6 +220,9 @@ class FirstPage extends StatelessWidget {
                                                   password: _passwordController
                                                       .text
                                                       .trim());
+                                          final userdoc = FirebaseFirestore.instance.collection('vishwakarma').doc(_emailController.text.trim());
+                                          await userdoc.set({'email':_emailController.text.trim()},SetOptions(merge: true));
+                                          
                                           //Popping progress indicator after logging in
                                           Navigator.pop(context);
 
