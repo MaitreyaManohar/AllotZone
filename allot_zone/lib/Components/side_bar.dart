@@ -84,7 +84,6 @@ class SideBar extends StatelessWidget {
                   );
                 }
                 if (snapshot.connectionState == ConnectionState.done && snapshot.data!.data()!=null) {
-                  if (snapshot.data!.data()!['sentRequest'] == null || snapshot.data!.data()!['roomChosen']==null) {
                     return ListTile(
                       title: Text((snapshot.data!.data()!['roomChosen'] == null)
                           ? "Room Selection"
@@ -106,9 +105,7 @@ class SideBar extends StatelessWidget {
                                             .data()!['roomChosen']))));
                       },
                     );
-                  } else {
-                    return const Text("loading");
-                  }
+                  
                 }
                 return const Text("loading");
               },
