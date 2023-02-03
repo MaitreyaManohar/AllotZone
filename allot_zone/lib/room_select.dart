@@ -47,6 +47,7 @@ class _RoomSelectionState extends State<RoomSelection> {
               loading(context);
               await FirebaseAuth.instance.signOut();
               Navigator.pop(context);
+              Navigator.popUntil(context, (route) => route.isFirst);
 
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: ((context) => FirstPage())));

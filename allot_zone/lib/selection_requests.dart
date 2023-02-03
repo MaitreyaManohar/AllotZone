@@ -56,6 +56,7 @@ class SelectionRequest extends StatelessWidget {
                 loading(context);
                 await FirebaseAuth.instance.signOut();
                 Navigator.pop(context);
+              Navigator.popUntil(context, (route) => route.isFirst);
 
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: ((context) => FirstPage())));
@@ -218,16 +219,36 @@ class SelectionRequest extends StatelessWidget {
                                                       return;
                                                     }
                                                   }
+                                                  
                                                   if (roomMateData.data()![
-                                                          'accepted'] ==
-                                                      null) {
+                                                          'requests'].keys.toList().contains(sender))
+                                                       {
+                                                    final docData =
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection('users')
+                                                            .doc(FirebaseAuth
+                                                                .instance
+                                                                .currentUser!
+                                                                .email);
+                                                    final userDataRead =
+                                                        await docData.get();
+                                                    Map userRequests =
+                                                        userDataRead.data()![
+                                                            'requests'];
+                                                    print(userRequests);
+                                                    userRequests.remove(sender);
+                                                    await docData.set({
+                                                      'requests': userRequests
+                                                    }, SetOptions(merge: true));
+                                                    Navigator.of(context).pop();
                                                     message(context,
                                                         "Your room mate $roommate has not accepted the request yet\n. You will be assigned this room only once he accepts it");
+                                                  
+                                                    return;
                                                   }
 
-                                                  if (roomMateData
-                                                      .data()!['accepted']
-                                                      .contains(sender)) {
+                                                  else{
                                                     final docData =
                                                         FirebaseFirestore
                                                             .instance

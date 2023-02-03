@@ -15,7 +15,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   User? loggedIn = FirebaseAuth.instance.currentUser;
-
+  
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
