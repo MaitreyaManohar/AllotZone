@@ -117,9 +117,11 @@ class _NewSwapState extends State<NewSwap> {
 
               if (roomToSwapData.data()!['isAvailable']) {
                 message(context, "Room $room_no has not been occupied");
+                return;
               } 
               
               else {
+                
                 final List residents = roomToSwapData.data()!['residents'];
                 final requestSwapDoc1 = FirebaseFirestore.instance
                     .collection('users')
