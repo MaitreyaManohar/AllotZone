@@ -1,3 +1,4 @@
+import 'package:allot_zone/after_selection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -92,7 +93,9 @@ class _PendinSwapsState extends State<PendinSwaps> {
 
                               final roomDataDoc = FirebaseFirestore.instance
                                   .collection('vishwakarma')
-                                  .doc(requesterData['roomChosen'].toString());
+                                  .doc(userDocdata
+                                      .data()!['roomChosen']
+                                      .toString());
                               final roomData = await roomDataDoc.get();
                               List residents = roomData.data()!['residents'];
                               residents.remove(
@@ -104,26 +107,82 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                   .doc(roommate);
                               final roomMateData = await roommateDoc.get();
                               List userDocList =
-                                  (userDocdata.data()!['acceptedswaps'] == null)
+                                  (userDocdata.data()!['acceptedrequests'] ==
+                                          null)
                                       ? []
-                                      : userDocdata.data()!['acceptedswaps'];
-                              userDocList.add(
-                                  FirebaseAuth.instance.currentUser!.email);
+                                      : userDocdata.data()!['acceptedrequests'];
+
+                              print(roomMateData.data());
+                              List roomMateAcceptedList = (roomMateData
+                                          .data()!['acceptedrequests'] ==
+                                      null)
+                                  ? []
+                                  : roomMateData.data()!['acceptedrequests'];
+                              print(roomMateAcceptedList);
+                              if (roomMateAcceptedList
+                                  .contains(roomSwapdata[index])) {
+                                userDocList.remove(roomSwapdata[index]);
+                                roomMateAcceptedList
+                                    .remove(roomSwapdata[index]);
+
+                                final roomtoSwapDoc = FirebaseFirestore.instance
+                                    .collection('vishwakarma')
+                                    .doc(requesterData['roomChosen'].toString());
+
+                                final roomtoSwapData =
+                                    await roomtoSwapDoc.get();
+                                List residentsRequester =
+                                    roomtoSwapData.data()!['residents'];
+                                residents.add(roommate);
+                                await roomDataDoc.set(
+                                    {'residents': residentsRequester},
+                                    SetOptions(merge: true));
+                                await roomtoSwapDoc.set(
+                                    {'residents': residents},
+                                    SetOptions(merge: true));
+
+                                final requesterDoc = FirebaseFirestore.instance
+                                    .collection('users')
+                                    .doc(roomSwapdata[index]);
+                                await requesterDoc.set({
+                                  'roomChosen':
+                                      userDocdata.data()!['roomChosen']
+                                }, SetOptions(merge: true));
+                                residentsRequester.remove(roomSwapdata[index]);
+                                String requesterRoommate =
+                                    residentsRequester[0];
+                                final requesterRoommatedoc = FirebaseFirestore
+                                    .instance
+                                    .collection('users')
+                                    .doc(requesterRoommate);
+                                await requesterRoommatedoc.set({
+                                  'roomChosen':
+                                      userDocdata.data()!['roomChosen']
+                                }, SetOptions(merge: true));
+                                await userDoc.set({
+                                  'roomChosen': requesterData['roomChosen'],
+                                  'acceptedrequests': userDocList,
+                                  'swaprequests': roomSwapdata
+                                }, SetOptions(merge: true));
+                                await roommateDoc.set({
+                                  'roomChosen': requesterData['roomChosen'],
+                                  'acceptedrequests': roomMateAcceptedList
+                                }, SetOptions(merge: true));
+                                Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                        builder: ((context) => AfterSelection(
+                                            roomNo:
+                                                requesterData['roomChosen']))));
+                                return;
+                              }
+                              userDocList.add(roomSwapdata[index]);
                               roomSwapdata.remove(roomSwapdata[index]);
-                              print(roomSwapdata);
                               message(context, "You accepted");
                               await userDoc.set({
                                 'acceptedrequests': userDocList,
                                 'swaprequests': roomSwapdata
                               }, SetOptions(merge: true));
-                              bool _acceptedCheck =
-                                  roomMateData.data()!['acceptedswaps'] == null;
-                              if (roomMateData
-                                      .data()!['acceptedswaps']
-                                      .contains(roomSwapdata[index]) &&
-                                  !_acceptedCheck) {
-                                    
-                                  }
+                              print("DONE");
                             },
                             icon: const Icon(Icons.check),
                           ),

@@ -59,6 +59,7 @@ class SideBar extends StatelessWidget {
             Container(
               height: 150,
               color: MyColors.buttonBackground,
+              child: Center(child: Text("Welcome ${FirebaseAuth.instance.currentUser!.email}")),
             ),
             FutureBuilder(
               future: FirebaseFirestore.instance
