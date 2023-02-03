@@ -127,7 +127,8 @@ class _PendinSwapsState extends State<PendinSwaps> {
 
                                 final roomtoSwapDoc = FirebaseFirestore.instance
                                     .collection('vishwakarma')
-                                    .doc(requesterData['roomChosen'].toString());
+                                    .doc(
+                                        requesterData['roomChosen'].toString());
 
                                 final roomtoSwapData =
                                     await roomtoSwapDoc.get();
@@ -187,7 +188,44 @@ class _PendinSwapsState extends State<PendinSwaps> {
                             icon: const Icon(Icons.check),
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              final userDoc = FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(
+                                      FirebaseAuth.instance.currentUser!.email);
+                              final userData = await userDoc.get();
+                              final userRoom = userData.data()!['roomChosen'];
+                              List userSwapdata =
+                                  userData.data()!['swaprequests'];
+
+                              final roomDoc = FirebaseFirestore.instance
+                                  .collection('vishwakarma')
+                                  .doc(userRoom.toString());
+                              final roomData = await roomDoc.get();
+                              List residents = roomData.data()!['residents'];
+                              residents.remove(
+                                  FirebaseAuth.instance.currentUser!.email);
+
+                              String roommate = residents[0];
+                              final roommateDoc = FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(roommate);
+                              final roommateData = await roommateDoc.get();
+                              print(roommateData.data()!['swaprequests']);
+                              List roommateSwapdata =
+                                  roommateData.data()!['swaprequests'];
+                              if (roommateData
+                                  .data()!['swaprequests']
+                                  .contains(roomSwapdata[index])) {
+                                roommateSwapdata.remove(roomSwapdata[index]);
+                                await roommateDoc.set(
+                                    {'swaprequests': roommateSwapdata},
+                                    SetOptions(merge: true));
+                              }
+                              userSwapdata.remove(roomSwapdata[index]);
+                              await userDoc.set({'swaprequests': userSwapdata},
+                                  SetOptions(merge: true));
+                            },
                             icon: const Icon(Icons.close),
                           )
                         ],
