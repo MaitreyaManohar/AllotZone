@@ -52,13 +52,13 @@ class FirstPage extends StatelessWidget {
                 "Welcome To \n Allot Zone!",
                 style: TextStyle(
                     fontFamily: 'Monsterrat',
-                    fontSize: 39,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold),
               ),
             ),
           ),
           SizedBox(
-            height: 270,
+            height: MediaQuery.of(context).size.height/3,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
