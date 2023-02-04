@@ -1,3 +1,4 @@
+import 'package:allot_zone/admin_page.dart';
 import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
@@ -23,6 +24,9 @@ class _SplashScreenState extends State<SplashScreen> {
     if (loggedIn == null) {
       print("True");
       return FirstPage();
+    }
+    if(loggedIn!.uid=='MpGdSsumKRTu6kFOWiO9HWwY77w2'){
+      return const AdminPage();
     }
     final userDoc =
         FirebaseFirestore.instance.collection('users').doc(loggedIn!.email);

@@ -59,89 +59,91 @@ class _RoomSelectionState extends State<RoomSelection> {
           )
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: DropdownButton(
-              borderRadius: BorderRadius.circular(10),
-              value: floorSelected,
-              focusColor: Colors.black,
-              dropdownColor: MyColors.appBackground,
-              iconEnabledColor: Colors.white,
-              onChanged: (e) {
-                setState(() {
-                  floorSelected = e!;
-                });
-              },
-              items: [
-                ...floorList
-                    .map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text("Floor $e"),
-                        ))
-                    .toList()
-              ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: DropdownButton(
+                borderRadius: BorderRadius.circular(10),
+                value: floorSelected,
+                focusColor: Colors.black,
+                dropdownColor: MyColors.appBackground,
+                iconEnabledColor: Colors.white,
+                onChanged: (e) {
+                  setState(() {
+                    floorSelected = e!;
+                  });
+                },
+                items: [
+                  ...floorList
+                      .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text("Floor $e"),
+                          ))
+                      .toList()
+                ],
+              ),
             ),
-          ),
-          RoomLayout(
-            floorSelected: floorSelected,
-            selectedList: selectedList,
-          ),
-          TextButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: ((context) {
-                  if (selectedList.isEmpty) {
-                    return const AlertDialog(
+            RoomLayout(
+              floorSelected: floorSelected,
+              selectedList: selectedList,
+            ),
+            TextButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: ((context) {
+                    if (selectedList.isEmpty) {
+                      return const AlertDialog(
+                        backgroundColor: Colors.grey,
+                        content: Text("Please select atleast one room!"),
+                      );
+                    }
+                    return AlertDialog(
                       backgroundColor: Colors.grey,
-                      content: Text("Please select atleast one room!"),
+                      content: const Text("Are you sure about your selection?"),
+                      actions: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                              backgroundColor: MyColors.buttonBackground),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(builder: ((context) {
+                              return WingMembers(selectedList: selectedList);
+                            })));
+                          },
+                          child: Text(
+                            'Yes',
+                            style: TextStyle(color: MyColors.buttonTextColor),
+                          ),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                              backgroundColor: MyColors.buttonBackground),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'No',
+                            style: TextStyle(color: MyColors.buttonTextColor),
+                          ),
+                        ),
+                      ],
                     );
-                  }
-                  return AlertDialog(
-                    backgroundColor: Colors.grey,
-                    content: const Text("Are you sure about your selection?"),
-                    actions: [
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: MyColors.buttonBackground),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: ((context) {
-                            return WingMembers(selectedList: selectedList);
-                          })));
-                        },
-                        child: Text(
-                          'Yes',
-                          style: TextStyle(color: MyColors.buttonTextColor),
-                        ),
-                      ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                            backgroundColor: MyColors.buttonBackground),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          'No',
-                          style: TextStyle(color: MyColors.buttonTextColor),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              );
-            },
-            style: TextButton.styleFrom(
-                backgroundColor: MyColors.buttonBackground,
-                foregroundColor: MyColors.buttonTextColor),
-            child: const Text("Confirm"),
-          )
-        ],
+                  }),
+                );
+              },
+              style: TextButton.styleFrom(
+                  backgroundColor: MyColors.buttonBackground,
+                  foregroundColor: MyColors.buttonTextColor),
+              child: const Text("Confirm"),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:allot_zone/admin_page.dart';
 import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -58,7 +59,7 @@ class FirstPage extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: MediaQuery.of(context).size.height/3,
+            height: MediaQuery.of(context).size.height / 3,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -129,11 +130,20 @@ class FirstPage extends StatelessWidget {
 
                         try {
                           //Signing in with given email and password
-                          await FirebaseAuth.instance
+                          UserCredential user = await FirebaseAuth.instance
                               .signInWithEmailAndPassword(
                                   email: _emailController.text.trim(),
                                   password: _passwordController.text.trim());
-
+                          if (user.user!.uid ==
+                              'MpGdSsumKRTu6kFOWiO9HWwY77w2') {
+                            Navigator.pop(context);
+                            Navigator.of(context)
+                                .pushReplacement(MaterialPageRoute(
+                              builder: (context) => const AdminPage(),
+                            )
+                            );
+                            return;
+                          }
                           Navigator.of(context)
                               .pop(); //Popping progress indicator after logging in
 
