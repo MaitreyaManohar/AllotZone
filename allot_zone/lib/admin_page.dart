@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:http/http.dart' as http;
 
 import 'Colors.dart';
 import 'login_first_page.dart';
@@ -26,6 +27,25 @@ class AdminPage extends StatelessWidget {
         builder: ((context) => const Center(
               child: CircularProgressIndicator(),
             )));
+  }
+
+  void sendEmail(
+      {required String body,
+      required String subject,
+      required String toEmail}) async {
+    final response = await http.post(
+      Uri.parse(
+          'https://allot-zone-backend-production.up.railway.app/mail/sendmail'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "recipient": toEmail,
+        "msgBody": "Dear $toEmail,\n\n$body \n\nBest wishes,\nTeam AllotZone",
+        "subject": subject
+      }),
+    );
+    if (response.statusCode != 200) {}
   }
 
   @override
@@ -77,46 +97,71 @@ class AdminPage extends StatelessWidget {
                       ? []
                       : snapshot.data!.docs[index].data()['residents'];
 
-              return ListTile(
-                style: ListTileStyle.drawer,
-                title: (residents.isEmpty)
-                    ? Text(roomNo)
-                    : Text("$roomNo - ${residents[0]} and ${residents[1]}"),
-                tileColor: isAvailable ? Colors.amber : Colors.grey,
-                trailing: TextButton(
-                  style: TextButton.styleFrom(
-                      backgroundColor: MyColors.buttonBackground),
-                  onPressed: () async {
-                    final roomDoc = FirebaseFirestore.instance
-                        .collection('vishwakarma')
-                        .doc(roomNo);
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)
+                  ),
+                  style: ListTileStyle.drawer,
+                  title: (residents.isEmpty)
+                      ? Text(roomNo)
+                      : Text("$roomNo - ${residents[0]} and ${residents[1]}"),
+                  tileColor: isAvailable ? Colors.amber : Colors.grey,
+                  trailing: TextButton(
+                    style: TextButton.styleFrom(
+                        backgroundColor: isAvailable?Color.fromARGB(255, 255, 98, 98):MyColors.buttonBackground),
+                    onPressed: () async {
+                      loading(context);
+                      final roomDoc = FirebaseFirestore.instance
+                          .collection('vishwakarma')
+                          .doc(roomNo);
 
-                    if (isAvailable) {
-                      await roomDoc
-                          .set({'isAvailable': false}, SetOptions(merge: true));
-                      return;
-                    } else {
-                      if (!residents.isEmpty) {
-                        final residentDoc1 = FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(snapshot.data!.docs[index]['residents'][0]);
-                        await residentDoc1.set(
-                            {'roomChosen': FieldValue.delete()},
-                            SetOptions(merge: true));
-                        final residentDoc2 = FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(snapshot.data!.docs[index]['residents'][1]);
-                        await residentDoc2.set(
-                            {'roomChosen': FieldValue.delete()},
-                            SetOptions(merge: true));
+                      if (isAvailable) {
+                        await roomDoc
+                            .set({'isAvailable': false}, SetOptions(merge: true));
+                        Navigator.pop(context);
+                        return;
+                      } else {
+                        if (residents.isNotEmpty) {
+                          final residentDoc1 = FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(snapshot.data!.docs[index]['residents'][0]);
+                          await residentDoc1.set({
+                            'roomChosen': FieldValue.delete(),
+                            'sentRequest': FieldValue.delete(),
+                          }, SetOptions(merge: true));
+                          final residentDoc2 = FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(snapshot.data!.docs[index]['residents'][1]);
+                          await residentDoc2.set({
+                            'roomChosen': FieldValue.delete(),
+                            'sentRequest': FieldValue.delete(),
+                          }, SetOptions(merge: true));
+                          sendEmail(
+                              body:
+                                  "Your room has been vacated by the admin. Please choose another room as soon as possible",
+                              subject: "Room Vacated by admin",
+                              toEmail: snapshot.data!.docs[index]['residents']
+                                  [0]);
+                          sendEmail(
+                              body:
+                                  "Your room has been vacated by the admin. Please choose another room as soon as possible",
+                              subject: "Room Vacated by admin",
+                              toEmail: snapshot.data!.docs[index]['residents']
+                                  [1]);
+                        }
+                        await roomDoc.set({
+                          'isAvailable': true,
+                          'residents': FieldValue.delete()
+                        }, SetOptions(merge: true));
                       }
-                      await roomDoc
-                          .set({'isAvailable': true}, SetOptions(merge: true));
-                    }
-                  },
-                  child: Text(
-                    !isAvailable ? 'Vacate' : 'Block',
-                    style: TextStyle(color: MyColors.buttonTextColor),
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      !isAvailable ? 'Vacate' : 'Block',
+                      style: TextStyle(color: isAvailable?Colors.black:MyColors.buttonTextColor),
+                    ),
                   ),
                 ),
               );
