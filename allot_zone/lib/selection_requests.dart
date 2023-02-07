@@ -1,9 +1,11 @@
+import 'dart:convert';
+
 import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/Components/side_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
 import 'after_selection.dart';
 import 'login_first_page.dart';
 
@@ -26,6 +28,27 @@ class SelectionRequest extends StatelessWidget {
               content: Text(message),
               backgroundColor: Colors.grey,
             )));
+  }
+
+  void sendEmail(BuildContext context,
+      {required String body,
+      required String subject,
+      required String toEmail}) async {
+    final response = await http.post(
+      Uri.parse(
+          'https://allot-zone-backend-production.up.railway.app/mail/sendmail'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "recipient": toEmail,
+        "msgBody": "Dear $toEmail,\n\n$body \n\nBest wishes,\nTeam AllotZone",
+        "subject": subject
+      }),
+    );
+    if (response.statusCode != 200) {
+      print(response.body);
+    }
   }
 
   Future _future() async {
@@ -56,7 +79,7 @@ class SelectionRequest extends StatelessWidget {
                 loading(context);
                 await FirebaseAuth.instance.signOut();
                 Navigator.pop(context);
-              Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.popUntil(context, (route) => route.isFirst);
 
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: ((context) => FirstPage())));
@@ -208,6 +231,21 @@ class SelectionRequest extends StatelessWidget {
                                                           },
                                                           SetOptions(
                                                               merge: true));
+                                                      sendEmail(context,
+                                                          body:
+                                                              "Congratulations!You have been allotted room $room.",
+                                                          subject:
+                                                              "Successful room allotment",
+                                                          toEmail: FirebaseAuth
+                                                              .instance
+                                                              .currentUser!
+                                                              .email!);
+                                                      sendEmail(context,
+                                                          body:
+                                                              "Congratulations!You have been allotted room $room.",
+                                                          subject:
+                                                              "Successful room allotment",
+                                                          toEmail: roommate);
                                                       Navigator.of(context)
                                                           .pop();
                                                       Navigator.of(context).pushReplacement(
@@ -219,10 +257,12 @@ class SelectionRequest extends StatelessWidget {
                                                       return;
                                                     }
                                                   }
-                                                  
-                                                  if (roomMateData.data()![
-                                                          'requests'].keys.toList().contains(sender))
-                                                       {
+
+                                                  if (roomMateData
+                                                      .data()!['requests']
+                                                      .keys
+                                                      .toList()
+                                                      .contains(sender)) {
                                                     final docData =
                                                         FirebaseFirestore
                                                             .instance
@@ -244,11 +284,9 @@ class SelectionRequest extends StatelessWidget {
                                                     Navigator.of(context).pop();
                                                     message(context,
                                                         "Your room mate $roommate has not accepted the request yet\n. You will be assigned this room only once he accepts it");
-                                                  
-                                                    return;
-                                                  }
 
-                                                  else{
+                                                    return;
+                                                  } else {
                                                     final docData =
                                                         FirebaseFirestore
                                                             .instance
@@ -294,6 +332,21 @@ class SelectionRequest extends StatelessWidget {
                                                       ]
                                                     });
                                                   }
+                                                  sendEmail(context,
+                                                          body:
+                                                              "Congratulations!You have been allotted room $room.",
+                                                          subject:
+                                                              "Successful room allotment",
+                                                          toEmail: FirebaseAuth
+                                                              .instance
+                                                              .currentUser!
+                                                              .email!);
+                                                      sendEmail(context,
+                                                          body:
+                                                              "Congratulations!You have been allotted room $room.",
+                                                          subject:
+                                                              "Successful room allotment",
+                                                          toEmail: roommate);
                                                   Navigator.of(context).pushReplacement(
                                                       MaterialPageRoute(
                                                           builder: ((context) =>
