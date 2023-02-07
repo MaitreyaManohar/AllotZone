@@ -1,6 +1,5 @@
-import 'dart:developer';
+import 'dart:convert';
 
-import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/login_first_page.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/selection_requests.dart';
@@ -8,9 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-
+import 'package:http/http.dart' as http;
 import 'Colors.dart';
 
 class WingMembers extends StatelessWidget {
@@ -35,6 +32,27 @@ class WingMembers extends StatelessWidget {
             )));
   }
 
+  void sendEmail(BuildContext context,
+      {required String body,
+      required String subject,
+      required String toEmail}) async {
+    final response = await http.post(
+      Uri.parse(
+          'https://allot-zone-backend-production.up.railway.app/mail/sendmail'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "recipient": toEmail,
+        "msgBody": "Dear $toEmail,\n\n$body \n\nBest wishes,\nTeam AllotZone",
+        "subject": subject
+      }),
+    );
+    if (response.statusCode != 200) {
+      print(response.body);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> emailList =
@@ -52,7 +70,7 @@ class WingMembers extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SizedBox(
-              height: 600,
+              height: MediaQuery.of(context).size.height*0.8,
               child: ListView.builder(
                 itemCount: selectedList.length,
                 itemBuilder: ((context, index) {
@@ -232,6 +250,11 @@ class WingMembers extends StatelessWidget {
                                             selectedList[(i / 2).floor()]
                                       }
                                     }, SetOptions(merge: true));
+                                    sendEmail(context,
+                                        body:
+                                            "Request from ${loggedIn.email} has been sent for room ${selectedList[(i / 2).floor()]}. Please accept or reject the request through the app.",
+                                        subject: "Room request",
+                                        toEmail: emailList[i]);
                                     if (i % 2 == 0) {
                                       await doc2.set({
                                         'requests': {

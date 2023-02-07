@@ -85,6 +85,9 @@ class SideBar extends StatelessWidget {
                   );
                 }
                 if (snapshot.connectionState == ConnectionState.done && snapshot.data!.data()!=null) {
+                    if(snapshot.data!.data()!['roomChosen']==null && snapshot.data!.data()!['sentRequest']!=null){
+                      return SizedBox.shrink();
+                    }
                     return ListTile(
                       title: Text((snapshot.data!.data()!['roomChosen'] == null)
                           ? "Room Selection"
