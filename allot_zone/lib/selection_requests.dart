@@ -46,8 +46,7 @@ class SelectionRequest extends StatelessWidget {
         "subject": subject
       }),
     );
-    if (response.statusCode != 200) {
-    }
+    if (response.statusCode != 200) {}
   }
 
   Future _future() async {
@@ -145,6 +144,7 @@ class SelectionRequest extends StatelessWidget {
                                                     backgroundColor: MyColors
                                                         .buttonBackground),
                                                 onPressed: () async {
+                                                  loading(context);
                                                   final doc2 = FirebaseFirestore
                                                       .instance
                                                       .collection('vishwakarma')
@@ -153,6 +153,7 @@ class SelectionRequest extends StatelessWidget {
                                                   if (data.data()![
                                                           'isAvailable'] ==
                                                       false) {
+                                                    Navigator.pop(context);
                                                     message(context,
                                                         "Room $room has already been occupied");
 
@@ -168,8 +169,10 @@ class SelectionRequest extends StatelessWidget {
                                                   if (roomMateData.data()![
                                                           'roomChosen'] !=
                                                       null) {
+                                                    Navigator.pop(context);
                                                     message(context,
                                                         "Your room mate $roommate has already chosen a room");
+
                                                     return;
                                                   }
                                                   if (roommate == sender) {
@@ -245,6 +248,7 @@ class SelectionRequest extends StatelessWidget {
                                                           subject:
                                                               "Successful room allotment",
                                                           toEmail: roommate);
+                                                      Navigator.pop(context);
                                                       Navigator.of(context)
                                                           .pop();
                                                       Navigator.of(context).pushReplacement(
@@ -280,6 +284,7 @@ class SelectionRequest extends StatelessWidget {
                                                     await docData.set({
                                                       'requests': userRequests
                                                     }, SetOptions(merge: true));
+                                                    Navigator.pop(context);
                                                     Navigator.of(context).pop();
                                                     message(context,
                                                         "Your room mate $roommate has not accepted the request yet\n. You will be assigned this room only once he accepts it");
@@ -332,20 +337,21 @@ class SelectionRequest extends StatelessWidget {
                                                     });
                                                   }
                                                   sendEmail(context,
-                                                          body:
-                                                              "Congratulations!You have been allotted room $room.",
-                                                          subject:
-                                                              "Successful room allotment",
-                                                          toEmail: FirebaseAuth
-                                                              .instance
-                                                              .currentUser!
-                                                              .email!);
-                                                      sendEmail(context,
-                                                          body:
-                                                              "Congratulations!You have been allotted room $room.",
-                                                          subject:
-                                                              "Successful room allotment",
-                                                          toEmail: roommate);
+                                                      body:
+                                                          "Congratulations!You have been allotted room $room.",
+                                                      subject:
+                                                          "Successful room allotment",
+                                                      toEmail: FirebaseAuth
+                                                          .instance
+                                                          .currentUser!
+                                                          .email!);
+                                                  sendEmail(context,
+                                                      body:
+                                                          "Congratulations!You have been allotted room $room.",
+                                                      subject:
+                                                          "Successful room allotment",
+                                                      toEmail: roommate);
+                                                  Navigator.pop(context);
                                                   Navigator.of(context).pushReplacement(
                                                       MaterialPageRoute(
                                                           builder: ((context) =>
