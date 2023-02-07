@@ -111,6 +111,7 @@ class _NewSwapState extends State<NewSwap> {
           style:
               TextButton.styleFrom(backgroundColor: MyColors.buttonBackground),
           onPressed: () async {
+            loading(context);
             if (!_roomCheck) {
               message(context, "Enter a valid room number");
             } else {
@@ -129,11 +130,14 @@ class _NewSwapState extends State<NewSwap> {
               Navigator.pop(context);
 
               if (userDocData.data()!['roomChosen'] == room_no) {
+                Navigator.pop(context);
                 message(context, "Please choose a room other than your room");
+
                 return;
               }
 
               if (roomToSwapData.data()!['isAvailable']) {
+                Navigator.pop(context);
                 message(context, "Room $room_no has not been occupied");
                 return;
               } else {
@@ -151,6 +155,8 @@ class _NewSwapState extends State<NewSwap> {
                         : swaprequests1data.data()!['swaprequests'];
                 if (swaprequests1list
                     .contains(FirebaseAuth.instance.currentUser!.email)) {
+                  Navigator.pop(context);
+
                   message(context, "You have already sent a request");
                   return;
                 }
@@ -170,6 +176,8 @@ class _NewSwapState extends State<NewSwap> {
                     subject: "New Swap request",
                     toEmail: residents[1]);
               }
+              Navigator.pop(context);
+
               message(context,
                   "A request has been sent to the residents in $room_no");
             }

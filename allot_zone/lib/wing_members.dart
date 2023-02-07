@@ -13,9 +13,8 @@ import 'Colors.dart';
 class WingMembers extends StatelessWidget {
   final List selectedList;
   List<String> emailList = [];
-  WingMembers({super.key, required this.selectedList}){
-    emailList =
-      List.generate(2 * selectedList.length, (index) => " ");
+  WingMembers({super.key, required this.selectedList}) {
+    emailList = List.generate(2 * selectedList.length, (index) => " ");
   }
 
   void loading(BuildContext context) {
@@ -57,7 +56,6 @@ class WingMembers extends StatelessWidget {
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,7 +81,7 @@ class WingMembers extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
                           onChanged: ((value) => emailList[2 * index] = value),
-                          onSubmitted: (value) =>emailList[2 * index] = value ,
+                          onSubmitted: (value) => emailList[2 * index] = value,
                           decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderRadius: const BorderRadius.all(
@@ -101,7 +99,8 @@ class WingMembers extends StatelessWidget {
                         child: TextField(
                           onChanged: ((value) =>
                               emailList[2 * index + 1] = value),
-                          onSubmitted: (value) =>emailList[2 * index + 1] = value ,
+                          onSubmitted: (value) =>
+                              emailList[2 * index + 1] = value,
                           decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderRadius: const BorderRadius.all(
@@ -210,6 +209,7 @@ class WingMembers extends StatelessWidget {
                                 backgroundColor: MyColors.buttonBackground),
                             onPressed: () async {
                               try {
+                                loading(context);
                                 for (String s in emailList) {
                                   final doc = FirebaseFirestore.instance
                                       .collection('users')
@@ -217,6 +217,8 @@ class WingMembers extends StatelessWidget {
                                   final data = await doc.get();
                                   if (data.data() != null &&
                                       data.data()!['roomChosen'] != null) {
+                                    Navigator.pop(context);
+
                                     showDialog(
                                         context: context,
                                         builder: ((context) => AlertDialog(
@@ -238,6 +240,7 @@ class WingMembers extends StatelessWidget {
                                 }
 
                                 //Add a loading
+                                loading(context);
                                 for (int i = 0; i < emailList.length; i++) {
                                   final doc = FirebaseFirestore.instance
                                       .collection('users')
@@ -288,6 +291,8 @@ class WingMembers extends StatelessWidget {
                                     }
                                   }
                                 }
+                                Navigator.pop(context);
+
                                 Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
                                         builder: ((context) =>

@@ -103,6 +103,7 @@ class _PendinSwapsState extends State<PendinSwaps> {
                         children: [
                           IconButton(
                             onPressed: () async {
+                              loading(context);
                               final userDoc = FirebaseFirestore.instance
                                   .collection('users')
                                   .doc(
@@ -150,7 +151,9 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                     await roomtoSwapDoc.get();
                                 List residentsRequester =
                                     roomtoSwapData.data()!['residents'];
-                                residents.add(roommate);
+
+                                residents.add(
+                                    FirebaseAuth.instance.currentUser!.email);
                                 await roomDataDoc.set(
                                     {'residents': residentsRequester},
                                     SetOptions(merge: true));
@@ -185,12 +188,29 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                   'roomChosen': requesterData['roomChosen'],
                                   'acceptedrequests': roomMateAcceptedList
                                 }, SetOptions(merge: true));
-                                sendEmail(body: "You have successfully swapped your room to ${requesterData['roomChosen']}", subject: "Successful room swap", toEmail: roommate);
-                                sendEmail(body: "You have successfully swapped your room to ${requesterData['roomChosen']}", subject: "Successful room swap", toEmail: FirebaseAuth.instance.currentUser!.email!);
-                                sendEmail(body: "You have successfully swapped your room to ${userDocdata.data()!['roomChosen']}", subject: "Successful room swap", toEmail: roomSwapdata[index]);
-                                sendEmail(body: "You have successfully swapped your room to ${userDocdata.data()!['roomChosen']}", subject: "Successful room swap", toEmail: requesterRoommate);
+                                sendEmail(
+                                    body:
+                                        "You have successfully swapped your room to ${requesterData['roomChosen']}",
+                                    subject: "Successful room swap",
+                                    toEmail: roommate);
+                                sendEmail(
+                                    body:
+                                        "You have successfully swapped your room to ${requesterData['roomChosen']}",
+                                    subject: "Successful room swap",
+                                    toEmail: FirebaseAuth
+                                        .instance.currentUser!.email!);
+                                sendEmail(
+                                    body:
+                                        "You have successfully swapped your room to ${userDocdata.data()!['roomChosen']}",
+                                    subject: "Successful room swap",
+                                    toEmail: roomSwapdata[index]);
+                                sendEmail(
+                                    body:
+                                        "You have successfully swapped your room to ${userDocdata.data()!['roomChosen']}",
+                                    subject: "Successful room swap",
+                                    toEmail: requesterRoommate);
 
-
+                                Navigator.pop(context);
 
                                 Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
@@ -201,6 +221,7 @@ class _PendinSwapsState extends State<PendinSwaps> {
                               }
                               userDocList.add(roomSwapdata[index]);
                               roomSwapdata.remove(roomSwapdata[index]);
+                              Navigator.pop(context);
                               message(context, "You accepted");
                               await userDoc.set({
                                 'acceptedrequests': userDocList,
