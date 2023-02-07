@@ -12,7 +12,11 @@ import 'Colors.dart';
 
 class WingMembers extends StatelessWidget {
   final List selectedList;
-  const WingMembers({super.key, required this.selectedList});
+  List<String> emailList = [];
+  WingMembers({super.key, required this.selectedList}){
+    emailList =
+      List.generate(2 * selectedList.length, (index) => " ");
+  }
 
   void loading(BuildContext context) {
     //Loading Progress indicator
@@ -53,11 +57,9 @@ class WingMembers extends StatelessWidget {
     }
   }
 
+  
   @override
   Widget build(BuildContext context) {
-    List<String> emailList =
-        List.generate(2 * selectedList.length, (index) => " ");
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -70,7 +72,7 @@ class WingMembers extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height*0.8,
+              height: MediaQuery.of(context).size.height * 0.8,
               child: ListView.builder(
                 itemCount: selectedList.length,
                 itemBuilder: ((context, index) {
@@ -81,6 +83,7 @@ class WingMembers extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: TextField(
                           onChanged: ((value) => emailList[2 * index] = value),
+                          onSubmitted: (value) =>emailList[2 * index] = value ,
                           decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderRadius: const BorderRadius.all(
@@ -98,6 +101,7 @@ class WingMembers extends StatelessWidget {
                         child: TextField(
                           onChanged: ((value) =>
                               emailList[2 * index + 1] = value),
+                          onSubmitted: (value) =>emailList[2 * index + 1] = value ,
                           decoration: InputDecoration(
                               enabledBorder: OutlineInputBorder(
                                   borderRadius: const BorderRadius.all(

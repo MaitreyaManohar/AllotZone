@@ -1,11 +1,10 @@
+import 'dart:convert';
+
 import 'package:allot_zone/after_selection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-
+import 'package:http/http.dart' as http;
 import '../Colors.dart';
 
 class PendinSwaps extends StatefulWidget {
@@ -37,6 +36,25 @@ class _PendinSwapsState extends State<PendinSwaps> {
               content: Text(message),
               backgroundColor: Colors.grey,
             )));
+  }
+
+  void sendEmail(
+      {required String body,
+      required String subject,
+      required String toEmail}) async {
+    final response = await http.post(
+      Uri.parse(
+          'https://allot-zone-backend-production.up.railway.app/mail/sendmail'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "recipient": toEmail,
+        "msgBody": "Dear $toEmail,\n\n$body \n\nBest wishes,\nTeam AllotZone",
+        "subject": subject
+      }),
+    );
+    if (response.statusCode != 200) {}
   }
 
   @override
@@ -112,13 +130,11 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                       ? []
                                       : userDocdata.data()!['acceptedrequests'];
 
-                              print(roomMateData.data());
                               List roomMateAcceptedList = (roomMateData
                                           .data()!['acceptedrequests'] ==
                                       null)
                                   ? []
                                   : roomMateData.data()!['acceptedrequests'];
-                              print(roomMateAcceptedList);
                               if (roomMateAcceptedList
                                   .contains(roomSwapdata[index])) {
                                 userDocList.remove(roomSwapdata[index]);
@@ -169,6 +185,13 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                   'roomChosen': requesterData['roomChosen'],
                                   'acceptedrequests': roomMateAcceptedList
                                 }, SetOptions(merge: true));
+                                sendEmail(body: "You have successfully swapped your room to ${requesterData['roomChosen']}", subject: "Successful room swap", toEmail: roommate);
+                                sendEmail(body: "You have successfully swapped your room to ${requesterData['roomChosen']}", subject: "Successful room swap", toEmail: FirebaseAuth.instance.currentUser!.email!);
+                                sendEmail(body: "You have successfully swapped your room to ${userDocdata.data()!['roomChosen']}", subject: "Successful room swap", toEmail: roomSwapdata[index]);
+                                sendEmail(body: "You have successfully swapped your room to ${userDocdata.data()!['roomChosen']}", subject: "Successful room swap", toEmail: requesterRoommate);
+
+
+
                                 Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
                                         builder: ((context) => AfterSelection(

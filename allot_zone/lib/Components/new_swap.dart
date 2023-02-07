@@ -1,10 +1,10 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
-
+import 'package:http/http.dart' as http;
 import '../Colors.dart';
 
 class NewSwap extends StatefulWidget {
@@ -18,6 +18,24 @@ class _NewSwapState extends State<NewSwap> {
   Color textFieldColor = MyColors.textFieldBorder;
   bool _roomCheck = false;
   int room_no = 100;
+  void sendEmail(
+      {required String body,
+      required String subject,
+      required String toEmail}) async {
+    final response = await http.post(
+      Uri.parse(
+          'https://allot-zone-backend-production.up.railway.app/mail/sendmail'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        "recipient": toEmail,
+        "msgBody": "Dear $toEmail,\n\n$body \n\nBest wishes,\nTeam AllotZone",
+        "subject": subject
+      }),
+    );
+    if (response.statusCode != 200) {}
+  }
 
   void loading(BuildContext context) {
     //Loading Progress indicator
@@ -107,10 +125,10 @@ class _NewSwapState extends State<NewSwap> {
                   .collection('users')
                   .doc(FirebaseAuth.instance.currentUser!.email);
               loading(context);
-              final userDocData =await userDoc.get();
+              final userDocData = await userDoc.get();
               Navigator.pop(context);
 
-              if(userDocData.data()!['roomChosen']==room_no){
+              if (userDocData.data()!['roomChosen'] == room_no) {
                 message(context, "Please choose a room other than your room");
                 return;
               }
@@ -118,10 +136,7 @@ class _NewSwapState extends State<NewSwap> {
               if (roomToSwapData.data()!['isAvailable']) {
                 message(context, "Room $room_no has not been occupied");
                 return;
-              } 
-              
-              else {
-                
+              } else {
                 final List residents = roomToSwapData.data()!['residents'];
                 final requestSwapDoc1 = FirebaseFirestore.instance
                     .collection('users')
@@ -134,17 +149,26 @@ class _NewSwapState extends State<NewSwap> {
                     (swaprequests1data.data()!['swaprequests'] == null)
                         ? []
                         : swaprequests1data.data()!['swaprequests'];
-                if(swaprequests1list.contains(FirebaseAuth.instance.currentUser!.email)){
+                if (swaprequests1list
+                    .contains(FirebaseAuth.instance.currentUser!.email)) {
                   message(context, "You have already sent a request");
                   return;
                 }
                 swaprequests1list.add(FirebaseAuth.instance.currentUser!.email);
-                await requestSwapDoc1.set({
-                  'swaprequests': swaprequests1list
-                }, SetOptions(merge: true));
-                await requestSwapDoc2.set({
-                  'swaprequests': swaprequests1list
-                }, SetOptions(merge: true));
+                await requestSwapDoc1.set({'swaprequests': swaprequests1list},
+                    SetOptions(merge: true));
+                await requestSwapDoc2.set({'swaprequests': swaprequests1list},
+                    SetOptions(merge: true));
+                sendEmail(
+                    body:
+                        "You have received a swap request from ${FirebaseAuth.instance.currentUser!.email} with room $room_no. Please open the app to accept or reject the request.",
+                    subject: "New Swap request",
+                    toEmail: residents[0]);
+                sendEmail(
+                    body:
+                        "You have received a swap request from ${FirebaseAuth.instance.currentUser!.email} with room $room_no. Please open the app to accept or reject the request.",
+                    subject: "New Swap request",
+                    toEmail: residents[1]);
               }
               message(context,
                   "A request has been sent to the residents in $room_no");
