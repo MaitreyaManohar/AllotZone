@@ -225,7 +225,7 @@ class WingMembers extends StatelessWidget {
                                               alignment: Alignment.center,
                                               backgroundColor: Colors.grey,
                                               content: Text(
-                                                  "Student with $s has already chosen a room"),
+                                                  "$s has already chosen a room"),
                                             )));
                                     return;
                                   }

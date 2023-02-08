@@ -255,16 +255,26 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                   .collection('users')
                                   .doc(roommate);
                               final roommateData = await roommateDoc.get();
-                              print(roommateData.data()!['swaprequests']);
                               List roommateSwapdata =
                                   roommateData.data()!['swaprequests'];
+                              List acceptedRequests = (roommateData
+                                          .data()!['acceptedrequests'] ==
+                                      null)
+                                  ? []
+                                  : roommateData.data()!['acceptedrequests'];
+                              print(acceptedRequests);
+                              acceptedRequests.remove(roomSwapdata[index]);
+                              await roommateDoc.set({
+                                'acceptedrequests': acceptedRequests,
+                              }, SetOptions(merge: true));
                               if (roommateData
                                   .data()!['swaprequests']
                                   .contains(roomSwapdata[index])) {
                                 roommateSwapdata.remove(roomSwapdata[index]);
-                                await roommateDoc.set(
-                                    {'swaprequests': roommateSwapdata},
-                                    SetOptions(merge: true));
+                                await roommateDoc.set({
+                                  'swaprequests': roommateSwapdata,
+                                  'acceptedrequests': acceptedRequests,
+                                }, SetOptions(merge: true));
                               }
                               userSwapdata.remove(roomSwapdata[index]);
                               await userDoc.set({'swaprequests': userSwapdata},
