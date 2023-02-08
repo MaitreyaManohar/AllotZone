@@ -8,10 +8,12 @@
   - Sign in with email id and password.
   - Forgot password.
   - Selection of rooms from different floors.
-  - Once selecteed, a user cannot select a room again. He will have to contact the admin to change his selection. 
-
+  - Once selecteed, a user cannot select a room again. He will have to contact the admin to change his selection.
+  - Confirmation requests to other wing members are sent through an email, they can respond by rejecting or accepting the request through the app.
+  - Facility to swap rooms after selecting rooms
+  - Admin access to vacate or block rooms.
 
 ### To be added features
  - Avoid data discrepancy
  - Implement creation of layout by the manager
-  
+ 
