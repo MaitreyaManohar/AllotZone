@@ -2,11 +2,9 @@ import 'package:allot_zone/Colors.dart';
 import 'package:allot_zone/Components/new_swap.dart';
 import 'package:allot_zone/Components/pending_swaps.dart';
 import 'package:allot_zone/Components/side_bar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'after_selection.dart';
 import 'login_first_page.dart';
 
 class SwapRequest extends StatelessWidget {

@@ -227,7 +227,6 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                 'acceptedrequests': userDocList,
                                 'swaprequests': roomSwapdata
                               }, SetOptions(merge: true));
-                              print("DONE");
                             },
                             icon: const Icon(Icons.check),
                           ),
@@ -262,7 +261,6 @@ class _PendinSwapsState extends State<PendinSwaps> {
                                       null)
                                   ? []
                                   : roommateData.data()!['acceptedrequests'];
-                              print(acceptedRequests);
                               acceptedRequests.remove(roomSwapdata[index]);
                               await roommateDoc.set({
                                 'acceptedrequests': acceptedRequests,

@@ -279,7 +279,6 @@ class SelectionRequest extends StatelessWidget {
                                                     Map userRequests =
                                                         userDataRead.data()![
                                                             'requests'];
-                                                    print(userRequests);
                                                     userRequests.remove(sender);
                                                     await docData.set({
                                                       'requests': userRequests

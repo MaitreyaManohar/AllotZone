@@ -1,6 +1,4 @@
 import 'package:allot_zone/Colors.dart';
-import 'package:allot_zone/login_first_page.dart';
-import 'package:allot_zone/room_select.dart';
 import 'package:allot_zone/selection_requests.dart';
 import 'package:allot_zone/splashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';

@@ -20,9 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   User? loggedIn = FirebaseAuth.instance.currentUser;
 
   Future<Widget> initialWidget() async {
-    print(loggedIn);
     if (loggedIn == null) {
-      print("True");
       return FirstPage();
     }
     if(loggedIn!.uid=='MpGdSsumKRTu6kFOWiO9HWwY77w2'){

@@ -52,7 +52,6 @@ class WingMembers extends StatelessWidget {
       }),
     );
     if (response.statusCode != 200) {
-      print(response.body);
     }
   }
 
@@ -124,7 +123,6 @@ class WingMembers extends StatelessWidget {
               child: TextButton(
                 //Confirm emails button
                 onPressed: () async {
-                  print(emailList);
                   User? loggedIn = FirebaseAuth.instance.currentUser;
                   if (loggedIn == null) {
                     Navigator.pushReplacement(context,
@@ -154,7 +152,6 @@ class WingMembers extends StatelessWidget {
                   } on Exception catch (e) {
                     message(context, e.toString());
                   }
-                  print("Checked chosen room");
                   final uniqueEmail = emailList.toSet();
                   if (uniqueEmail.length != emailList.length) {
                     showDialog(
@@ -166,7 +163,6 @@ class WingMembers extends StatelessWidget {
                             )));
                     return;
                   }
-                  print("Checked duplicate emails ");
 
                   for (String s in emailList) {
                     if (!EmailValidator.validate(s)) {
@@ -181,7 +177,6 @@ class WingMembers extends StatelessWidget {
                     }
                   }
 
-                  print("Checked validity of emails");
 
                   if (!emailList.contains(loggedIn.email)) {
                     showDialog(
