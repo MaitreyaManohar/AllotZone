@@ -111,6 +111,7 @@ class _NewSwapState extends State<NewSwap> {
           style:
               TextButton.styleFrom(backgroundColor: MyColors.buttonBackground),
           onPressed: () async {
+            FocusManager.instance.primaryFocus?.unfocus();
             loading(context);
             if (!_roomCheck) {
               message(context, "Enter a valid room number");
@@ -118,6 +119,7 @@ class _NewSwapState extends State<NewSwap> {
               final roomToSwapDoc = FirebaseFirestore.instance
                   .collection('vishwakarma')
                   .doc(room_no.toString());
+
               loading(context);
               final roomToSwapData = await roomToSwapDoc.get();
               Navigator.of(context).pop();
@@ -135,7 +137,13 @@ class _NewSwapState extends State<NewSwap> {
 
                 return;
               }
-
+              final userRoomDoc = FirebaseFirestore.instance
+                  .collection('vishwakarma')
+                  .doc(userDocData.data()!['roomChosen'].toString());
+              final userRoomdata = await userRoomDoc.get();
+              List residents = userRoomdata.data()!['residents'];
+              residents.remove(FirebaseAuth.instance.currentUser!.email);
+              String roommate = residents[0];
               if (roomToSwapData.data()!['isAvailable']) {
                 Navigator.pop(context);
                 message(context, "Room $room_no has not been occupied");
@@ -149,12 +157,27 @@ class _NewSwapState extends State<NewSwap> {
                     .collection('users')
                     .doc(residents[1]);
                 final swaprequests1data = await requestSwapDoc1.get();
+                final swaprequests2data = await requestSwapDoc2.get();
                 List swaprequests1list =
                     (swaprequests1data.data()!['swaprequests'] == null)
                         ? []
                         : swaprequests1data.data()!['swaprequests'];
+                List swaprequests2list =
+                    swaprequests2data.data()!['swaprequests'] == null
+                        ? []
+                        : swaprequests2data.data()!['swaprequests'];
+                if (swaprequests1list.contains(roommate) ||
+                    swaprequests2list.contains(roommate)) {
+                  Navigator.pop(context);
+
+                  message(context,
+                      "Your roommate already sent a request to this room");
+                  return;
+                }
                 if (swaprequests1list
-                    .contains(FirebaseAuth.instance.currentUser!.email)) {
+                        .contains(FirebaseAuth.instance.currentUser!.email) ||
+                    swaprequests2list
+                        .contains(FirebaseAuth.instance.currentUser!.email)) {
                   Navigator.pop(context);
 
                   message(context, "You have already sent a request");
