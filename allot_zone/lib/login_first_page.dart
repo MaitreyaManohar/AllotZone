@@ -1,3 +1,4 @@
+import 'package:allot_zone/admin_page.dart';
 import 'package:allot_zone/after_selection.dart';
 import 'package:allot_zone/room_select.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,21 +42,6 @@ class FirstPage extends StatelessWidget {
         title: const Text(
           'AllotZone',
         ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent),
-            onPressed: ()async {
-              loading(context);
-              await FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
-            },
-            child: Text(
-              'SignOut',
-              style: TextStyle(color: MyColors.buttonTextColor),
-            ),
-          )
-        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -67,13 +53,13 @@ class FirstPage extends StatelessWidget {
                 "Welcome To \n Allot Zone!",
                 style: TextStyle(
                     fontFamily: 'Monsterrat',
-                    fontSize: 39,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold),
               ),
             ),
           ),
           SizedBox(
-            height: 270,
+            height: MediaQuery.of(context).size.height / 3,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -144,11 +130,20 @@ class FirstPage extends StatelessWidget {
 
                         try {
                           //Signing in with given email and password
-                          await FirebaseAuth.instance
+                          UserCredential user = await FirebaseAuth.instance
                               .signInWithEmailAndPassword(
                                   email: _emailController.text.trim(),
                                   password: _passwordController.text.trim());
-
+                          if (user.user!.uid ==
+                              'Wl06miuny3VEUc155hTwCEOEw872') {
+                            Navigator.pop(context);
+                            Navigator.of(context)
+                                .pushReplacement(MaterialPageRoute(
+                              builder: (context) => const AdminPage(),
+                            )
+                            );
+                            return;
+                          }
                           Navigator.of(context)
                               .pop(); //Popping progress indicator after logging in
 
@@ -234,6 +229,16 @@ class FirstPage extends StatelessWidget {
                                                   password: _passwordController
                                                       .text
                                                       .trim());
+                                          final userdoc = FirebaseFirestore
+                                              .instance
+                                              .collection('vishwakarma')
+                                              .doc(
+                                                  _emailController.text.trim());
+                                          await userdoc.set({
+                                            'email':
+                                                _emailController.text.trim()
+                                          }, SetOptions(merge: true));
+
                                           //Popping progress indicator after logging in
                                           Navigator.pop(context);
 

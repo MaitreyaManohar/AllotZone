@@ -6,19 +6,22 @@ class Room extends StatefulWidget {
   final int roomNo;
   final bool isAvailable;
   final List selectedList;
-  const Room(
+  Color fillColor = Colors.transparent;
+  Room(
       {super.key,
       required this.selectedList,
       required this.roomNo,
-      required this.isAvailable});
+      required this.isAvailable}){
+        fillColor = selectedList.contains(roomNo)?Colors.amber:Colors.transparent;
+      }
 
   @override
   State<Room> createState() => _RoomState();
 }
 
 class _RoomState extends State<Room> {
-  bool isSelected = false;
-  Color fillColor = Colors.transparent;
+ 
+  
 
   Future<bool> isAvailableCheck() async {
     final collection = FirebaseFirestore.instance.collection('vishwakarma');
@@ -27,6 +30,7 @@ class _RoomState extends State<Room> {
     return data.data()!['isAvailable'];
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Object>(
@@ -39,7 +43,7 @@ class _RoomState extends State<Room> {
             onTap: () {
               
               if (widget.selectedList.length > 4 &&
-                  fillColor == Colors.transparent) {
+                  widget.fillColor == Colors.transparent) {
                 showDialog(
                   context: context,
                   builder: ((context) => const AlertDialog(
@@ -50,18 +54,18 @@ class _RoomState extends State<Room> {
                 return;
               }
               setState(() {
-                if (isSelected && snapshot.data == true) {
-                  isSelected = false;
+                if ( snapshot.data == true && widget.selectedList.contains(widget.roomNo)) {
+                  
                   widget.selectedList.remove(widget.roomNo);
-                  fillColor = Colors.transparent;
+                  widget.fillColor = Colors.transparent;
                 } else if (snapshot.data == true) {
-                  isSelected = true;
+                  
                   widget.selectedList.add(widget.roomNo);
-                  fillColor = MyColors.buttonBackground;
+                  widget.fillColor = MyColors.buttonBackground;
                 } else {
-                  fillColor = Colors.grey;
+                  widget.fillColor = Colors.grey;
                   widget.selectedList.remove(widget.roomNo);
-                  isSelected = false;
+                  
                 }
               });
               
@@ -72,7 +76,7 @@ class _RoomState extends State<Room> {
                 decoration: BoxDecoration(
                     border: Border.all(color: MyColors.buttonTextColor),
                     borderRadius: BorderRadius.circular(2),
-                    color: snapshot.data == true ? fillColor : Colors.grey),
+                    color: snapshot.data == true ? widget.fillColor : Colors.grey),
                 height: 22,
                 width: 22,
                 child: Center(
